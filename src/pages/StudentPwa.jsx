@@ -326,8 +326,10 @@ export default function StudentPwa({
         e.preventDefault();
         if (!userRoleplayReply.trim()) return;
 
+        const currentInput = userRoleplayReply.trim();
+        const lowerMsg = currentInput.toLowerCase();
         const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        const userMsg = { sender: 'student', text: userRoleplayReply, time };
+        const userMsg = { sender: 'student', text: currentInput, time };
         
         setRoleplayMessages(prev => [...prev, userMsg]);
         setUserRoleplayReply('');
@@ -336,31 +338,32 @@ export default function StudentPwa({
         setTimeout(() => {
             setIsCharTyping(false);
             let replyText = '';
-            const lowerMsg = userRoleplayReply.toLowerCase();
             
             if (activeRoleplayChar.id === 'mbok-bakul') {
                 if (lowerMsg.includes('setunggal') || lowerMsg.includes('kalih') || lowerMsg.includes('tiga') || lowerMsg.includes('bungkus') || lowerMsg.includes('mawon')) {
-                    replyText = 'Nggih siap, Nak. Puniki barangipun sampun dibuntel. Wonten panyuwunan sanesipun ingkang badhe dipuntumbas?';
-                } else if (lowerMsg.includes('pinten') || lowerMsg.includes('rega') || lowerMsg.includes('biji')) {
-                    replyText = 'Menawi niki reganipun rolas ewu rupiyah per bungkus, Nak. Tasih seger-seger kabeh saking petani.';
-                } else if (lowerMsg.includes('matur nuwun') || lowerMsg.includes('suwun') || lowerMsg.includes('sampun') || lowerMsg.includes('kesah')) {
-                    replyText = 'Sami-sami, Nak! Matur nuwun sampun mampir ing lapak kula. Mugi slamet ing dalan nggih!';
+                    replyText = 'Nggih siap, Nak. Puniki barangipun sampun dibuntel rapi. Wonten panyuwunan sanesipun ingkang badhe dipuntumbas?';
+                } else if (lowerMsg.includes('pinten') || lowerMsg.includes('rega') || lowerMsg.includes('biji') || lowerMsg.includes('pira')) {
+                    replyText = 'Menawi puniki reganipun rolas ewu rupiyah per bungkus, Nak. Tasih seger-seger sedaya saking petani.';
+                } else if (lowerMsg.includes('matur nuwun') || lowerMsg.includes('suwun') || lowerMsg.includes('sampun') || lowerMsg.includes('kesah') || lowerMsg.includes('pamit')) {
+                    replyText = 'Sami-sami, Nak! Matur nuwun sampun mampir ing lapak kula. Mugi-mugi berkah lan slamet ing dalan nggih!';
+                } else if (lowerMsg.includes('sugeng') || lowerMsg.includes('halo') || lowerMsg.includes('pagi') || lowerMsg.includes('enjang')) {
+                    replyText = 'Sugeng enjang uga, Nak. Lapak kula buka terus, badhe mundhut sayur napa jajan pasar?';
                 } else {
-                    replyText = 'Oalah nggih Nak, wonten ingkang saged kula bantu malih ing lapak sayur puniki?';
+                    replyText = `Nggih Nak, ngenani "${currentInput}", Mbok Bakul siyap ngladosi. Wonten bumbu utawi sayur sanes ingkang dipunbetahaken?`;
                 }
             } else if (activeRoleplayChar.id === 'simbah') {
                 if (lowerMsg.includes('kabar') || lowerMsg.includes('sehat')) {
-                    replyText = 'Alhamdulillah Simbah sehat Wal-afiat, Le/Nduk. Kepriye sekolahmu dinten puniki?';
+                    replyText = 'Alhamdulillah Simbah sehat Wal-afiat, Le/Nduk. Kepriye sekolah lan pasinaonmu dinten puniki?';
                 } else if (lowerMsg.includes('sungkem') || lowerMsg.includes('pangestu') || lowerMsg.includes('pamit')) {
                     replyText = 'Nggih Le/Nduk, Simbah tansah njurung donga pangestu. Mugi-mugi sinau lan cita-citamu dilancarake Gusti Allah.';
                 } else {
-                    replyText = 'Syukur bage. Pancen kudu sregep sinau basa Jawa Krama, ben ora lali karo unggah-ungguh lan etika subasita.';
+                    replyText = `Matur nuwun ya Le/Nduk. Pancen bener kandhamu ngenani "${currentInput}", kita kudu sregep njaga unggah-ungguh Basa Jawa.`;
                 }
             } else {
                 if (lowerMsg.includes('tugas') || lowerMsg.includes('pr') || lowerMsg.includes('ujian')) {
                     replyText = 'Nggih, ingkang sregep anggonmu nggarap tugas Basa Jawa. Menawi wonten ingkang bingung saged nyuwun pirsa Bapak Guru.';
                 } else {
-                    replyText = 'Sugeng enjang! Babagan kagiatan pembelajaran dinten puniki, monggo disiapake buku lan ketrampilan basanipun nggih.';
+                    replyText = `Bapak wis krungu bab "${currentInput}". Monggo dipunsiapake ketrampilan lan etika basanipun nggih!`;
                 }
             }
 
