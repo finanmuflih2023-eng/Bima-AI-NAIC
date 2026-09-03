@@ -31,8 +31,11 @@ export default function App() {
         .select('*')
         .order('id', { ascending: true });
 
+      const localCustom = localStorage.getItem('bima_custom_classes');
+      const customClasses = localCustom ? JSON.parse(localCustom) : [];
+
       if (!classesError && classesData && classesData.length > 0) {
-        setClasses(classesData);
+        setClasses([...classesData, ...customClasses]);
       } else {
         // Fallback data kelas Jawa untuk kemudahan demonstrasi
         const fallbackClasses = [
@@ -40,7 +43,7 @@ export default function App() {
           { id: 2, title: 'Kelas 9B - Gladhen Krama', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9B', school_name: 'SMP Negeri 1 Yogyakarta', students: 1, latest: 'Tuku Buku ing Toko (Krama Lugu)', progress: 55 },
           { id: 3, title: 'Kelas 9C - Aksara Jawa', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9C', school_name: 'SMP Negeri 1 Yogyakarta', students: 0, latest: 'Belum ada asesmen', progress: 0 }
         ];
-        setClasses(fallbackClasses);
+        setClasses([...fallbackClasses, ...customClasses]);
       }
     };
 
@@ -191,15 +194,22 @@ export default function App() {
       .insert([newClassRow])
       .select();
 
+    let createdObj = null;
     if (!error && data) {
-      setClasses([...classes, data[0]]);
+      createdObj = data[0];
     } else {
-      const generated = {
+      createdObj = {
         id: Date.now(),
         ...newClassRow
       };
-      setClasses([...classes, generated]);
     }
+
+    const updatedClasses = [...classes, createdObj];
+    setClasses(updatedClasses);
+
+    // Save to localStorage for instant student login availability
+    const existingCustom = JSON.parse(localStorage.getItem('bima_custom_classes') || '[]');
+    localStorage.setItem('bima_custom_classes', JSON.stringify([...existingCustom, createdObj]));
   };
 
   // --- 4. DELETE CLASS ---

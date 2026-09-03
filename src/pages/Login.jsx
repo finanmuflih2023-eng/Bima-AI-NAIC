@@ -122,7 +122,9 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
 
         if (!matchedClass) {
             // Fallback untuk kemudahan demonstrasi jika offline/database kosong
-            const localMatch = classes.find(c => c.token.toUpperCase() === cleanToken);
+            const localCustom = JSON.parse(localStorage.getItem('bima_custom_classes') || '[]');
+            const allLocalClasses = [...classes, ...localCustom];
+            const localMatch = allLocalClasses.find(c => c.token.toUpperCase() === cleanToken);
             if (localMatch) {
                 onStudentLogin({
                     name: studentName.trim(),
