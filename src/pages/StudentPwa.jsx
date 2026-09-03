@@ -322,25 +322,66 @@ export default function StudentPwa({
         setRoleplayScore(0);
     };
 
-    const handleSendRoleplay = (e) => {
+    const handleSendRoleplay = async (e) => {
         e.preventDefault();
         if (!userRoleplayReply.trim()) return;
 
         const currentInput = userRoleplayReply.trim();
-        const lowerMsg = currentInput.toLowerCase();
         const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         const userMsg = { sender: 'student', text: currentInput, time };
         
-        setRoleplayMessages(prev => [...prev, userMsg]);
+        const updatedMessages = [...roleplayMessages, userMsg];
+        setRoleplayMessages(updatedMessages);
         setUserRoleplayReply('');
         setIsCharTyping(true);
 
-        setTimeout(() => {
-            setIsCharTyping(false);
-            let replyText = '';
-            
+        const systemPrompts = {
+            'mbok-bakul': 'Sampeyan iku Mbok Bakul pasar tradisional ing Jogja ingkang grapyak, ramah, lan pinter tawar-menawar nggunakake Basa Jawa Krama. Tanggapi omongane pembeli (siswa) ing basa Jawa Krama kanthi alami, fleksibel, lan kontekstual (kalebu menawi siswa nawar rega). Jawab singkat 1-2 ukara.',
+            'simbah': 'Sampeyan iku Simbah Putri ingkang bijaksana, welas asih, lan nresnani putune. Tanggapi percakapan putu (siswa) nggunakake Basa Jawa Krama Inggil / Ngoko Alus kanthi pituduh lan donga. Jawab singkat 1-2 ukara.',
+            'pak-guru': 'Sampeyan iku Pak Guru Basa Jawa ingkang wicaksana, sabar, lan paring dorongan pasinaon. Tanggapi murid (siswa) nggunakake Basa Jawa Krama ingkang trep marang etika. Jawab singkat 1-2 ukara.'
+        };
+
+        const charSystemPrompt = systemPrompts[activeRoleplayChar.id] || systemPrompts['mbok-bakul'];
+
+        let replyText = '';
+
+        try {
+            // 1. Integrasi API Generatif LLM Real-time
+            const promptMessages = [
+                { role: 'system', content: charSystemPrompt },
+                ...updatedMessages.slice(-6).map(m => ({
+                    role: m.sender === 'student' ? 'user' : 'assistant',
+                    content: m.text
+                }))
+            ];
+
+            const response = await fetch('https://text.pollinations.ai/openai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: promptMessages,
+                    model: 'openai',
+                    seed: Math.floor(Math.random() * 1000)
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.choices && data.choices[0]?.message?.content) {
+                    replyText = data.choices[0].message.content.trim();
+                }
+            }
+        } catch (err) {
+            console.warn("AI LLM online tidak merespon, menggunakan engine kontekstual lokal:", err);
+        }
+
+        // 2. Fallback cerdas jika jaringan offline atau API bermasalah
+        if (!replyText) {
+            const lowerMsg = currentInput.toLowerCase();
             if (activeRoleplayChar.id === 'mbok-bakul') {
-                if (lowerMsg.includes('setunggal') || lowerMsg.includes('kalih') || lowerMsg.includes('tiga') || lowerMsg.includes('bungkus') || lowerMsg.includes('mawon')) {
+                if (lowerMsg.includes('sepulo') || lowerMsg.includes('10') || lowerMsg.includes('angsal') || lowerMsg.includes('tawar') || lowerMsg.includes('murah')) {
+                    replyText = 'Wah menawi sepuluh ewu dherek rugi Nak, Mbok Bakul ngalap bathi sekedhik. Nyuwun rolas ewu mawon nggih?';
+                } else if (lowerMsg.includes('setunggal') || lowerMsg.includes('kalih') || lowerMsg.includes('tiga') || lowerMsg.includes('bungkus') || lowerMsg.includes('mawon')) {
                     replyText = 'Nggih siap, Nak. Puniki barangipun sampun dibuntel rapi. Wonten panyuwunan sanesipun ingkang badhe dipuntumbas?';
                 } else if (lowerMsg.includes('pinten') || lowerMsg.includes('rega') || lowerMsg.includes('biji') || lowerMsg.includes('pira')) {
                     replyText = 'Menawi puniki reganipun rolas ewu rupiyah per bungkus, Nak. Tasih seger-seger sedaya saking petani.';
@@ -349,28 +390,23 @@ export default function StudentPwa({
                 } else if (lowerMsg.includes('sugeng') || lowerMsg.includes('halo') || lowerMsg.includes('pagi') || lowerMsg.includes('enjang')) {
                     replyText = 'Sugeng enjang uga, Nak. Lapak kula buka terus, badhe mundhut sayur napa jajan pasar?';
                 } else {
-                    replyText = `Nggih Nak, ngenani "${currentInput}", Mbok Bakul siyap ngladosi. Wonten bumbu utawi sayur sanes ingkang dipunbetahaken?`;
+                    replyText = `Nggih Nak, ngenani "${currentInput}", Mbok Bakul siap ngladosi. Menawi badhe mundhut sayur utawi bumbu sanesipun monggo.`;
                 }
             } else if (activeRoleplayChar.id === 'simbah') {
                 if (lowerMsg.includes('kabar') || lowerMsg.includes('sehat')) {
                     replyText = 'Alhamdulillah Simbah sehat Wal-afiat, Le/Nduk. Kepriye sekolah lan pasinaonmu dinten puniki?';
-                } else if (lowerMsg.includes('sungkem') || lowerMsg.includes('pangestu') || lowerMsg.includes('pamit')) {
-                    replyText = 'Nggih Le/Nduk, Simbah tansah njurung donga pangestu. Mugi-mugi sinau lan cita-citamu dilancarake Gusti Allah.';
                 } else {
-                    replyText = `Matur nuwun ya Le/Nduk. Pancen bener kandhamu ngenani "${currentInput}", kita kudu sregep njaga unggah-ungguh Basa Jawa.`;
+                    replyText = `Matur nuwun ya Le/Nduk. Ngenani "${currentInput}", kita kudu tansah sregep njaga unggah-ungguh lan etika subasita Basa Jawa.`;
                 }
             } else {
-                if (lowerMsg.includes('tugas') || lowerMsg.includes('pr') || lowerMsg.includes('ujian')) {
-                    replyText = 'Nggih, ingkang sregep anggonmu nggarap tugas Basa Jawa. Menawi wonten ingkang bingung saged nyuwun pirsa Bapak Guru.';
-                } else {
-                    replyText = `Bapak wis krungu bab "${currentInput}". Monggo dipunsiapake ketrampilan lan etika basanipun nggih!`;
-                }
+                replyText = `Nggih, babagan "${currentInput}" puniki sampun trep. Monggo terus dipunlatih ketrampilan basa Jawa Krama ingkang bener!`;
             }
+        }
 
-            setRoleplayMessages(prev => [...prev, { sender: 'char', text: replyText, time }]);
-            setRoleplayScore(prev => prev + 25);
-            addXp(30);
-        }, 1200);
+        setIsCharTyping(false);
+        setRoleplayMessages(prev => [...prev, { sender: 'char', text: replyText, time }]);
+        setRoleplayScore(prev => prev + 25);
+        addXp(30);
     };
 
     const handleEndRoleplay = () => {
