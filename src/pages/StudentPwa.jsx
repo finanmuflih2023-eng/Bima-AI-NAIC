@@ -398,24 +398,37 @@ export default function StudentPwa({
             console.warn("AI LLM online tidak merespon, menggunakan engine kontekstual lokal:", err);
         }
 
-        // 2. Engine Percakapan Jawa Dinamis & Kontekstual
+        // 2. Engine Percakapan Jawa Dinamis & Kontekstual (Prioritas Niat/Intent)
         if (!replyText) {
             const lowerMsg = currentInput.toLowerCase();
             if (activeRoleplayChar.id === 'mbok-bakul') {
-                if (lowerMsg.includes('wortel') || lowerMsg.includes('bayam') || lowerMsg.includes('kobis') || lowerMsg.includes('kubis') || lowerMsg.includes('bawang') || lowerMsg.includes('tomat') || lowerMsg.includes('lombok') || lowerMsg.includes('sayur') || lowerMsg.includes('tahu') || lowerMsg.includes('tempe')) {
+                // INTENT 1: Pertanyaan Harga / Rega (Prioritas Tinggi)
+                if (lowerMsg.includes('pinten') || lowerMsg.includes('rega') || lowerMsg.includes('reganipun') || lowerMsg.includes('regane') || lowerMsg.includes('biji') || lowerMsg.includes('pira') || lowerMsg.includes('piro')) {
+                    replyText = 'Menawi setunggal bungkus puniki reganipun rolas ewu rupiyah per bungkus, Nak. Tasih seger-seger sedaya saking petani. Sampeyan badhe mundhut pinten bungkus?';
+                } 
+                // INTENT 2: Tawar-Menawar Harga
+                else if (lowerMsg.includes('sepulo') || lowerMsg.includes('10') || lowerMsg.includes('angsal') || lowerMsg.includes('tawar') || lowerMsg.includes('murah') || lowerMsg.includes('kurang') || lowerMsg.includes('dherek')) {
+                    replyText = 'Wah menawi semanten Mbok Bakul ngalap bathi sekedhik banget Nak. Pripun menawi dipungenepaken rolas ewu mawon, sampun dherek murah sanget nggih?';
+                } 
+                // INTENT 3: Nama Barang / Sayur Spesifik
+                else if (lowerMsg.includes('wortel') || lowerMsg.includes('bayam') || lowerMsg.includes('kobis') || lowerMsg.includes('kubis') || lowerMsg.includes('bawang') || lowerMsg.includes('tomat') || lowerMsg.includes('lombok') || lowerMsg.includes('sayur') || lowerMsg.includes('tahu') || lowerMsg.includes('tempe')) {
                     const itemMatched = lowerMsg.match(/wortel|bayam|kobis|kubis|bawang|tomat|lombok|sayur|tahu|tempe/)[0];
                     replyText = `Oalah badhe mundhut ${itemMatched} nggih Nak? Puniki ${itemMatched}-ipun seger banget nembe rawuh saking petani. Reganipun mung gangsal ewu per bungkus. Badhe mundhut pinten bungkus?`;
-                } else if (lowerMsg.includes('sepulo') || lowerMsg.includes('10') || lowerMsg.includes('angsal') || lowerMsg.includes('tawar') || lowerMsg.includes('murah') || lowerMsg.includes('kurang') || lowerMsg.includes('dherek')) {
-                    replyText = 'Wah menawi semanten Mbok Bakul ngalap bathi sekedhik banget Nak. Pripun menawi dipungenepaken rolas ewu mawon, sampun dherek murah sanget nggih?';
-                } else if (lowerMsg.includes('setunggal') || lowerMsg.includes('kalih') || lowerMsg.includes('tiga') || lowerMsg.includes('bungkus') || lowerMsg.includes('kilo') || lowerMsg.includes('mawon')) {
+                } 
+                // INTENT 4: Jumlah Beli / Konfirmasi Bungkusan (Hanya jika tidak menanyakan harga)
+                else if (lowerMsg.includes('setunggal') || lowerMsg.includes('kalih') || lowerMsg.includes('tiga') || lowerMsg.includes('bungkus') || lowerMsg.includes('kilo') || lowerMsg.includes('mawon')) {
                     replyText = 'Nggih siap Nak, puniki pesananipun sampun dibuntel rapi. Wonten panyuwunan bumbu utawi jajan sanes ingkang badhe dipuntumbas?';
-                } else if (lowerMsg.includes('pinten') || lowerMsg.includes('rega') || lowerMsg.includes('biji') || lowerMsg.includes('pira') || lowerMsg.includes('piro')) {
-                    replyText = 'Menawi niki reganipun rolas ewu rupiyah per bungkus Nak. Seger-seger lan kualitasipun sae sanget kagem masak ing omah.';
-                } else if (lowerMsg.includes('matur nuwun') || lowerMsg.includes('suwun') || lowerMsg.includes('sampun') || lowerMsg.includes('kesah') || lowerMsg.includes('pamit') || lowerMsg.includes('mboten')) {
+                } 
+                // INTENT 5: Pamitan & Terima Kasih
+                else if (lowerMsg.includes('matur nuwun') || lowerMsg.includes('suwun') || lowerMsg.includes('sampun') || lowerMsg.includes('kesah') || lowerMsg.includes('pamit') || lowerMsg.includes('mboten')) {
                     replyText = 'Sami-sami Nak! Matur nuwun sanget sampun mampir lan belanja ing lapak Mbok Bakul. Mugi-mugi berkah lan slamet ing dalan nggih!';
-                } else if (lowerMsg.includes('sugeng') || lowerMsg.includes('halo') || lowerMsg.includes('pagi') || lowerMsg.includes('enjang') || lowerMsg.includes('siang')) {
+                } 
+                // INTENT 6: Menyapa / Greetings
+                else if (lowerMsg.includes('sugeng') || lowerMsg.includes('halo') || lowerMsg.includes('pagi') || lowerMsg.includes('enjang') || lowerMsg.includes('siang')) {
                     replyText = 'Sugeng enjang uga Nak! Lapak Mbok Bakul buka terus. Wonten sayur seger lan jajan pasar jangkep, badhe madosi napa dinten puniki?';
-                } else {
+                } 
+                // INTENT DEFAULT
+                else {
                     replyText = `Nggih Nak, monggo dipunpilih sayur seger lan bumbu ing lapak Mbok Bakul. Sedaya bahane berkualitas lan resik kagem masak kulawarga.`;
                 }
             } else if (activeRoleplayChar.id === 'simbah') {
