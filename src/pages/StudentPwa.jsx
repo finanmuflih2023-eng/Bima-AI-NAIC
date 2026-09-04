@@ -4,6 +4,7 @@ import {
     ArrowLeft, Check, AlertCircle, X, ChevronRight, User, Trophy, 
     Send, RefreshCw, Zap, History, Star, LogOut
 } from 'lucide-react';
+import { getGroqApiKey } from '../groqConfig';
 
 export default function StudentPwa({ 
     user, 
@@ -369,7 +370,7 @@ export default function StudentPwa({
         let replyText = '';
 
         try {
-            // 1. Integrasi API Generatif LLM Real-time
+            // 1. Integrasi API Generatif Groq Cloud LLM Real-time (Model GPT-OSS-120B)
             const promptMessages = [
                 { role: 'system', content: charSystemPrompt },
                 ...updatedMessages.slice(-6).map(m => ({
@@ -378,13 +379,17 @@ export default function StudentPwa({
                 }))
             ];
 
-            const response = await fetch('https://text.pollinations.ai/openai', {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getGroqApiKey()}`
+                },
                 body: JSON.stringify({
+                    model: 'openai/gpt-oss-120b',
                     messages: promptMessages,
-                    model: 'openai',
-                    seed: Math.floor(Math.random() * 1000)
+                    temperature: 0.7,
+                    max_tokens: 150
                 })
             });
 

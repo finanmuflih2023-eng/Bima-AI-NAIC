@@ -3,6 +3,7 @@ import {
     Search, Sparkles, Wand2, Eye, FileText, CheckCircle2, 
     MessageSquare, ArrowRight, Upload, Edit, Trash, Check, Plus
 } from 'lucide-react';
+import { getGroqApiKey } from '../groqConfig';
 
 export default function AiGenerator({ 
     user, 
@@ -90,98 +91,136 @@ export default function AiGenerator({
         const prompt = `Buat ${count} soal evaluasi lisan bahasa Jawa dengan ragam ${kramaType}, konteks sosiokultural ${contextSituation}. Gunakan kompetensi yang diekstrak: ${extractedKeywords.filter(k => selectedKeywords.includes(k.id)).map(k => k.word).join(', ')}`;
 
         try {
-            // Kita coba melakukan post ke API Ollama lokal yang diproxy di /api/generate
-            const response = await fetch('/api/generate', {
+        const systemPrompt = `Anda adalah Asisten Generator Soal Lisan Basa Jawa Sosiokultural Kurikulum Merdeka.
+Tugas Anda adalah menghasilkan daftar soal/skenario evaluasi lisan Basa Jawa format JSON persis tanpa markdown/codeblock berlebih.
+
+Format JSON yang diwajibkan (array of objects):
+[
+  {
+    "id": "draft-1",
+    "title": "Judul Singkat Skenario",
+    "scenario": "Deskripsi kahanan/skenario ing basa Jawa/Indonesia...",
+    "level": "${kramaType === 'krama-alus' ? 'Krama Alus' : 'Krama Lugu'}",
+    "context": "${contextSituation}",
+    "correctTranscript": "Kalimat target Basa Jawa Krama ingkang trep",
+    "audioStimulus": "Instruksi lisan kagem siswa",
+    "audioNativeExample": "Kalimat target Basa Jawa Krama ingkang trep"
+  }
+]`;
+
+        const userPrompt = `Buatkan ${count} soal evaluasi lisan Basa Jawa ragam ${kramaType} dengan konteks ${contextSituation}. 
+Kompetensi CP: ${extractedKeywords.filter(k => selectedKeywords.includes(k.id)).map(k => k.word).join(', ') || 'Unggah-Ungguh Basa Jawa'}.
+Kembalikan HANYA JSON array persis sesuai format.`;
+
+        let generatedFromLLM = false;
+
+        try {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getGroqApiKey()}`
+                },
                 body: JSON.stringify({
-                    model: 'bima-ai',
-                    prompt: prompt,
-                    stream: false,
-                    format: 'json'
-                }),
+                    model: 'openai/gpt-oss-120b',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 1000
+                })
             });
 
-            if (!response.ok) {
-                throw new Error(`Ollama lokal tidak merespon (HTTP ${response.status}).`);
+            if (response.ok) {
+                const data = await response.json();
+                const content = data.choices && data.choices[0]?.message?.content;
+                if (content) {
+                    // Extract JSON if wrapped in markdown blocks
+                    const cleanJsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const parsedData = JSON.parse(cleanJsonStr);
+                    if (Array.isArray(parsedData) && parsedData.length > 0) {
+                        // Ensure each question has a unique ID
+                        const formatted = parsedData.map((q, idx) => ({
+                            ...q,
+                            id: `draft-${Date.now()}-${idx + 1}`
+                        }));
+                        setDraftQuestions(formatted);
+                        generatedFromLLM = true;
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn("Groq LLM online generator error, falling back to BIMA Local Engine:", error);
+        }
+
+        if (!generatedFromLLM) {
+            console.warn("Menggunakan engine generator sosiokultural lokal BIMA (Local Fallback)...");
+            const matchedClass = classes.find(c => c.token === selectedClassToken);
+            const isSMP = matchedClass ? matchedClass.level === 'SMP' : true;
+            
+            let fallbacks = [];
+            if (kramaType === 'krama-alus') {
+                fallbacks = [
+                    {
+                        id: `draft-${Date.now()}-1`,
+                        title: 'Pamit Dolan marang Ibu',
+                        scenario: 'Sampeyan arep dolan menyang omahe kanca, nanging Ibu nembe maos koran ing ruang tamu. Kepriye anggonmu pamit nggunakake basa Krama Alus sing bener?',
+                        level: 'Krama Alus',
+                        context: 'anak-wongtuwa',
+                        correctTranscript: 'Ibu, kula nyuwun idi badhe kesah dhateng dalemipun kanca.',
+                        audioStimulus: 'Bocah-bocah, bayangake kahanan iki. Sampeyan arep dolan menyang omahe kanca, nanging Ibu nembe maos koran ing ruang tamu. Nyaketa, banjur pamita nggunakake basa Krama Alus sing trep.',
+                        audioNativeExample: 'Ibu, kula nyuwun idi badhe kesah dhateng dalemipun kanca.'
+                    },
+                    {
+                        id: `draft-${Date.now()}-2`,
+                        title: 'Nyuwun Pirsa Bantuan PR marang Kakak/Bapak',
+                        scenario: 'Sampeyan nemoni kesulitan nggarap PR Basa Jawa. Kepriye anggonmu nyuwun tulung marang Bapak nganggo unggah-ungguh Krama Alus?',
+                        level: 'Krama Alus',
+                        context: 'anak-wongtuwa',
+                        correctTranscript: 'Bapak, kula nyuwun tulung badhe nyuwun pirsa babagan PR puniki.',
+                        audioStimulus: 'Matur marang bapakmu ing ruang keluarga, nyuwun tulung bab PR Jawa sing angel.',
+                        audioNativeExample: 'Bapak, kula nyuwun tulung badhe nyuwun pirsa babagan PR puniki.'
+                    },
+                    {
+                        id: `draft-${Date.now()}-3`,
+                        title: 'Sapa Aruh marang Pak Guru',
+                        scenario: 'Sampeyan kepethuk Pak Guru ing dalan nalika arep menyang perpustakaan. Kepriye anggonmu sapa aruh (menyapa) nggunakake unggah-ungguh sing trep?',
+                        level: 'Krama Alus',
+                        context: 'murid-guru',
+                        correctTranscript: 'Sugeng enjang Pak, badhe tindak dhateng perpustakaan nggih?',
+                        audioStimulus: 'Bayangake sampeyan mlaku ing koridor sekolah banjur kepethuk Pak Guru sing arep tindak menyang perpustakaan. Kepriye sapa aruh sing sopan?',
+                        audioNativeExample: 'Sugeng enjang Pak, badhe tindak dhateng perpustakaan nggih?'
+                    }
+                ];
+            } else {
+                fallbacks = [
+                    {
+                        id: `draft-${Date.now()}-1`,
+                        title: 'Tuku Buku ing Toko (Krama Lugu)',
+                        scenario: 'Sampeyan arep tuku buku ing toko. Kepriye anggonmu takon rega buku marang bakule nggunakake basa Krama Lugu?',
+                        level: 'Krama Lugu',
+                        context: 'rekan-sederajat',
+                        correctTranscript: 'Mbak, kula badhe tumbas buku puniki, reganipun pinten nggih?',
+                        audioStimulus: 'Sampeyan mlebu toko buku, banjur takon rega buku sekolah marang petugas toko nggunakake basa Krama Lugu.',
+                        audioNativeExample: 'Mbak, kula badhe tumbas buku puniki, reganipun pinten nggih?'
+                    },
+                    {
+                        id: `draft-${Date.now()}-2`,
+                        title: 'Sapa Aruh marang Kanca Anyar',
+                        scenario: 'Sampeyan kepethuk kanca anyar sekelas ing halte bus. Kepriye sapa aruh nganggo Krama Lugu sing santun lan rukun?',
+                        level: 'Krama Lugu',
+                        context: 'rekan-sederajat',
+                        correctTranscript: 'Sugeng siyang, nopo sampeyan ugi nembe ngrantos bus badhe mantuk?',
+                        audioStimulus: 'Kenalan karo kanca anyar ing halte bis, sapa nganggo ragam krama lugu.',
+                        audioNativeExample: 'Sugeng siyang, nopo sampeyan ugi nembe ngrantos bus badhe mantuk?'
+                    }
+                ];
             }
 
-            const data = await response.json();
-            const parsedData = JSON.parse(data.response);
-            setDraftQuestions(parsedData);
-        } catch (error) {
-            console.warn("Menggunakan engine generator sosiokultural lokal BIMA (Local Fallback)...");
-            
-            // local engine fallback: Membuat draf soal lisan adaptif berkualitas tinggi
-            setTimeout(() => {
-                const matchedClass = classes.find(c => c.token === selectedClassToken);
-                const isSMP = matchedClass ? matchedClass.level === 'SMP' : true;
-                
-                let fallbacks = [];
-                if (kramaType === 'krama-alus') {
-                    fallbacks = [
-                        {
-                            id: 'draft-1',
-                            title: 'Pamit Dolan marang Ibu',
-                            scenario: 'Sampeyan arep dolan menyang omahe kanca, nanging Ibu nembe maos koran ing ruang tamu. Kepriye anggonmu pamit nggunakake basa Krama Alus sing bener?',
-                            level: 'Krama Alus',
-                            context: 'anak-wongtuwa',
-                            correctTranscript: 'Ibu, kula nyuwun idi badhe kesah dhateng dalemipun kanca.',
-                            audioStimulus: 'Bocah-bocah, bayangake kahanan iki. Sampeyan arep dolan menyang omahe kanca, nanging Ibu nembe maos koran ing ruang tamu. Nyaketa, banjur pamita nggunakake basa Krama Alus sing trep.',
-                            audioNativeExample: 'Ibu, kula nyuwun idi badhe kesah dhateng dalemipun kanca.'
-                        },
-                        {
-                            id: 'draft-2',
-                            title: 'Nyuwun Pirsa Bantuan PR marang Kakak/Bapak',
-                            scenario: 'Sampeyan nemoni kesulitan nggarap PR Basa Jawa. Kepriye anggonmu nyuwun tulung marang Bapak nganggo unggah-ungguh Krama Alus?',
-                            level: 'Krama Alus',
-                            context: 'anak-wongtuwa',
-                            correctTranscript: 'Bapak, kula nyuwun tulung badhe nyuwun pirsa babagan PR puniki.',
-                            audioStimulus: 'Matur marang bapakmu ing ruang keluarga, nyuwun tulung bab PR Jawa sing angel.',
-                            audioNativeExample: 'Bapak, kula nyuwun tulung badhe nyuwun pirsa babagan PR puniki.'
-                        },
-                        {
-                            id: 'draft-3',
-                            title: 'Sapa Aruh marang Pak Guru',
-                            scenario: 'Sampeyan kepethuk Pak Guru ing dalan nalika arep menyang perpustakaan. Kepriye anggonmu sapa aruh (menyapa) nggunakake unggah-ungguh sing trep?',
-                            level: 'Krama Alus',
-                            context: 'murid-guru',
-                            correctTranscript: 'Sugeng enjang Pak, badhe tindak dhateng perpustakaan nggih?',
-                            audioStimulus: 'Bayangake sampeyan mlaku ing koridor sekolah banjur kepethuk Pak Guru sing arep tindak menyang perpustakaan. Kepriye sapa aruh sing sopan?',
-                            audioNativeExample: 'Sugeng enjang Pak, badhe tindak dhateng perpustakaan nggih?'
-                        }
-                    ];
-                } else {
-                    fallbacks = [
-                        {
-                            id: 'draft-1',
-                            title: 'Tuku Buku ing Toko (Krama Lugu)',
-                            scenario: 'Sampeyan arep tuku buku ing toko. Kepriye anggonmu takon rega buku marang bakule nggunakake basa Krama Lugu?',
-                            level: 'Krama Lugu',
-                            context: 'rekan-sederajat',
-                            correctTranscript: 'Mbak, kula badhe tumbas buku puniki, reganipun pinten nggih?',
-                            audioStimulus: 'Sampeyan mlebu toko buku, banjur takon rega buku sekolah marang petugas toko nggunakake basa Krama Lugu.',
-                            audioNativeExample: 'Mbak, kula badhe tumbas buku puniki, reganipun pinten nggih?'
-                        },
-                        {
-                            id: 'draft-2',
-                            title: 'Sapa Aruh marang Kanca Anyar',
-                            scenario: 'Sampeyan kepethuk kanca anyar sekelas ing halte bus. Kepriye sapa aruh nganggo Krama Lugu sing santun lan rukun?',
-                            level: 'Krama Lugu',
-                            context: 'rekan-sederajat',
-                            correctTranscript: 'Sugeng siyang, nopo sampeyan ugi nembe ngrantos bus badhe mantuk?',
-                            audioStimulus: 'Kenalan karo kanca anyar ing halte bis, sapa nganggo ragam krama lugu.',
-                            audioNativeExample: 'Sugeng siyang, nopo sampeyan ugi nembe ngrantos bus badhe mantuk?'
-                        }
-                    ];
-                }
-
-                // Slice based on requested count
-                setDraftQuestions(fallbacks.slice(0, count));
-            }, 1000);
-        } finally {
-            setIsGenerating(false);
+            setDraftQuestions(fallbacks.slice(0, count));
         }
+        setIsGenerating(false);
     };
 
     // --- FITUR EDIT DRAF SOAL (TEACHER CONTROL PANEL) ---
