@@ -41,7 +41,10 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
             }
 
             if (!data) {
-                // Fallback Guru Offline untuk testing lokal
+                // Check local registered teachers fallback
+                const localTeachers = JSON.parse(localStorage.getItem('bima_registered_teachers') || '[]');
+                const matchedLocal = localTeachers.find(t => t.name.toLowerCase() === name.toLowerCase() && t.password === password);
+
                 if (name === 'Ki Hadjar' && password === 'admin') {
                     onLogin({
                         id: 1,
@@ -49,14 +52,16 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
                         role: 'Educator',
                         school: 'SMP Negeri 1 Yogyakarta'
                     });
-                } else {
-                    // Izinkan login dengan nama bebas jika memasukkan password 'admin' atau offline demo
+                } else if (matchedLocal) {
                     onLogin({
-                        id: Date.now(),
-                        name: name,
+                        id: matchedLocal.id,
+                        name: matchedLocal.name,
                         role: 'Educator',
-                        school: 'SMK SMTI Yogyakarta'
+                        school: matchedLocal.school || 'Sekolah Penggerak'
                     });
+                } else {
+                    alert('Login Gagal! Nama Pengajar atau Kata Sandi Anda salah.');
+                    return;
                 }
             } else {
                 onLogin({
@@ -72,31 +77,38 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
                 return;
             }
 
+            const newTeacherObj = {
+                id: Date.now(),
+                name,
+                email,
+                school,
+                password
+            };
+
             try {
-                const { data, error } = await supabase
+                const { data: inserted, error } = await supabase
                     .from('teachers')
                     .insert([{ name, email, school, password }])
                     .select();
 
-                if (error) throw error;
-
-                alert('Akun guru berhasil disimpan!');
-                onLogin({
-                    id: data[0].id,
-                    name: data[0].name,
-                    role: 'Educator',
-                    school: data[0].school
-                });
+                if (!error && inserted && inserted.length > 0) {
+                    newTeacherObj.id = inserted[0].id;
+                }
             } catch (err) {
-                console.warn("Supabase signup failed, logging in locally:", err.message);
-                alert('Pendaftaran berhasil! (Disimpan secara lokal)');
-                onLogin({
-                    id: Date.now(),
-                    name: name,
-                    role: 'Educator',
-                    school: school || 'Sekolah Penggerak'
-                });
+                console.warn("Supabase signup failed, saving locally:", err.message);
             }
+
+            // Save to local registered teachers
+            const existingTeachers = JSON.parse(localStorage.getItem('bima_registered_teachers') || '[]');
+            localStorage.setItem('bima_registered_teachers', JSON.stringify([...existingTeachers, newTeacherObj]));
+
+            alert(`Pendaftaran Akun Guru ${name} Berhasil! Silakan masuk.`);
+            onLogin({
+                id: newTeacherObj.id,
+                name: newTeacherObj.name,
+                role: 'Educator',
+                school: newTeacherObj.school
+            });
         }
     };
 

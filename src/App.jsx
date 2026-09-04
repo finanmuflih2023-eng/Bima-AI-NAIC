@@ -34,21 +34,42 @@ export default function App() {
       const localCustom = localStorage.getItem('bima_custom_classes');
       const customClasses = localCustom ? JSON.parse(localCustom) : [];
 
+      const fallbackClasses = [
+        { id: 1, title: 'Kelas 9A - Sesi Remen Basa', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9A', school_name: 'SMP Negeri 1 Yogyakarta', students: 3, latest: 'Evaluasi Pacelathon Ibu', progress: 71, is_default: true },
+        { id: 2, title: 'Kelas 9B - Gladhen Krama', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9B', school_name: 'SMP Negeri 1 Yogyakarta', students: 1, latest: 'Tuku Buku ing Toko (Krama Lugu)', progress: 55, is_default: true },
+        { id: 3, title: 'Kelas 9C - Aksara Jawa', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9C', school_name: 'SMP Negeri 1 Yogyakarta', students: 0, latest: 'Belum ada asesmen', progress: 0, is_default: true }
+      ];
+
+      let rawList = fallbackClasses;
       if (!classesError && classesData && classesData.length > 0) {
-        setClasses([...classesData, ...customClasses]);
+        // Merge without duplicates by token
+        const combined = [...classesData, ...customClasses];
+        const uniqueMap = new Map();
+        combined.forEach(c => uniqueMap.set(c.token, c));
+        rawList = Array.from(uniqueMap.values());
       } else {
-        // Fallback data kelas Jawa untuk kemudahan demonstrasi
-        const fallbackClasses = [
-          { id: 1, title: 'Kelas 9A - Sesi Remen Basa', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9A', school_name: 'SMP Negeri 1 Yogyakarta', students: 3, latest: 'Evaluasi Pacelathon Ibu', progress: 71 },
-          { id: 2, title: 'Kelas 9B - Gladhen Krama', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9B', school_name: 'SMP Negeri 1 Yogyakarta', students: 1, latest: 'Tuku Buku ing Toko (Krama Lugu)', progress: 55 },
-          { id: 3, title: 'Kelas 9C - Aksara Jawa', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9C', school_name: 'SMP Negeri 1 Yogyakarta', students: 0, latest: 'Belum ada asesmen', progress: 0 }
-        ];
-        setClasses([...fallbackClasses, ...customClasses]);
+        const combined = [...fallbackClasses, ...customClasses];
+        const uniqueMap = new Map();
+        combined.forEach(c => uniqueMap.set(c.token, c));
+        rawList = Array.from(uniqueMap.values());
+      }
+
+      // Teacher Class Isolation: Show 3 default classes + classes created by CURRENT teacher only
+      if (user && userRole === 'teacher') {
+        const teacherName = user.name;
+        const isolated = rawList.filter(c => 
+          c.is_default || 
+          ['BIMA-SMP9A', 'BIMA-SMP9B', 'BIMA-SMP9C'].includes(c.token) || 
+          c.created_by === teacherName
+        );
+        setClasses(isolated);
+      } else {
+        setClasses(rawList);
       }
     };
 
     fetchClasses();
-  }, [user]);
+  }, [user, userRole]);
 
   // Fetch quizzes, released tasks, and student submissions
   useEffect(() => {
@@ -186,7 +207,8 @@ export default function App() {
       school_name: classData.schoolName,
       students: 0,
       latest: 'Belum ada asesmen',
-      progress: 0
+      progress: 0,
+      created_by: user?.name || 'Ki Hadjar'
     };
 
     const { data, error } = await supabase
