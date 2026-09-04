@@ -613,12 +613,22 @@ export default function StudentPwa({
                                         msg.sender === 'student' ? 'ml-auto items-end' : 'mr-auto items-start'
                                     }`}
                                 >
-                                    <div className={`p-4 rounded-2xl text-xs font-semibold leading-relaxed text-left shadow-2xs ${
+                                    <div className={`p-4 rounded-2xl text-xs font-semibold leading-relaxed text-left shadow-2xs relative group ${
                                         msg.sender === 'student' 
                                             ? 'bg-[#3E2723] text-white rounded-tr-none' 
                                             : 'bg-white text-gray-800 border border-gray-150 rounded-tl-none'
                                     }`}>
-                                        {msg.text}
+                                        <p>{msg.text}</p>
+                                        {msg.sender !== 'student' && (
+                                            <button 
+                                                type="button"
+                                                onClick={() => handlePlayNative(msg.text)}
+                                                className="mt-2.5 inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 px-2.5 py-1 rounded-lg text-[10px] font-black cursor-pointer transition"
+                                            >
+                                                <Volume2 size={12} className="text-amber-800 animate-pulse" />
+                                                Putar Swara AI
+                                            </button>
+                                        )}
                                     </div>
                                     <span className="text-[8px] text-gray-400 mt-1">{msg.time}</span>
                                 </div>
