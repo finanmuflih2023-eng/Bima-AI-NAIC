@@ -103,13 +103,36 @@ export default function StudentPwa({
         }
     };
 
-    const handlePlayNative = (word) => {
-        if ('speechSynthesis' in window) {
+    const handlePlayNative = (text) => {
+        if (!('speechSynthesis' in window)) {
+            alert('Browser ini tidak mendukung Speech Synthesis.');
+            return;
+        }
+        
+        try {
             window.speechSynthesis.cancel();
-            const utterance = new UtteranceJavanese(word);
-            window.speechSynthesis.speak(utterance);
-        } else {
-            alert('Memutar audio native speaker...');
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.85;
+                utterance.pitch = 1.0;
+                
+                const speakNow = () => {
+                    const voices = window.speechSynthesis.getVoices();
+                    const idVoice = voices.find(v => v.lang.startsWith('id') || v.lang.includes('ID') || v.name.toLowerCase().includes('indonesia'));
+                    if (idVoice) utterance.voice = idVoice;
+                    window.speechSynthesis.speak(utterance);
+                };
+
+                if (window.speechSynthesis.getVoices().length > 0) {
+                    speakNow();
+                } else {
+                    window.speechSynthesis.onvoiceschanged = speakNow;
+                    speakNow();
+                }
+            }, 60);
+        } catch (e) {
+            console.error("Audio TTS error:", e);
         }
     };
 
@@ -375,31 +398,40 @@ export default function StudentPwa({
             console.warn("AI LLM online tidak merespon, menggunakan engine kontekstual lokal:", err);
         }
 
-        // 2. Fallback cerdas jika jaringan offline atau API bermasalah
+        // 2. Engine Percakapan Jawa Dinamis & Kontekstual
         if (!replyText) {
             const lowerMsg = currentInput.toLowerCase();
             if (activeRoleplayChar.id === 'mbok-bakul') {
-                if (lowerMsg.includes('sepulo') || lowerMsg.includes('10') || lowerMsg.includes('angsal') || lowerMsg.includes('tawar') || lowerMsg.includes('murah')) {
-                    replyText = 'Wah menawi sepuluh ewu dherek rugi Nak, Mbok Bakul ngalap bathi sekedhik. Nyuwun rolas ewu mawon nggih?';
-                } else if (lowerMsg.includes('setunggal') || lowerMsg.includes('kalih') || lowerMsg.includes('tiga') || lowerMsg.includes('bungkus') || lowerMsg.includes('mawon')) {
-                    replyText = 'Nggih siap, Nak. Puniki barangipun sampun dibuntel rapi. Wonten panyuwunan sanesipun ingkang badhe dipuntumbas?';
-                } else if (lowerMsg.includes('pinten') || lowerMsg.includes('rega') || lowerMsg.includes('biji') || lowerMsg.includes('pira')) {
-                    replyText = 'Menawi puniki reganipun rolas ewu rupiyah per bungkus, Nak. Tasih seger-seger sedaya saking petani.';
-                } else if (lowerMsg.includes('matur nuwun') || lowerMsg.includes('suwun') || lowerMsg.includes('sampun') || lowerMsg.includes('kesah') || lowerMsg.includes('pamit')) {
-                    replyText = 'Sami-sami, Nak! Matur nuwun sampun mampir ing lapak kula. Mugi-mugi berkah lan slamet ing dalan nggih!';
-                } else if (lowerMsg.includes('sugeng') || lowerMsg.includes('halo') || lowerMsg.includes('pagi') || lowerMsg.includes('enjang')) {
-                    replyText = 'Sugeng enjang uga, Nak. Lapak kula buka terus, badhe mundhut sayur napa jajan pasar?';
+                if (lowerMsg.includes('wortel') || lowerMsg.includes('bayam') || lowerMsg.includes('kobis') || lowerMsg.includes('kubis') || lowerMsg.includes('bawang') || lowerMsg.includes('tomat') || lowerMsg.includes('lombok') || lowerMsg.includes('sayur') || lowerMsg.includes('tahu') || lowerMsg.includes('tempe')) {
+                    const itemMatched = lowerMsg.match(/wortel|bayam|kobis|kubis|bawang|tomat|lombok|sayur|tahu|tempe/)[0];
+                    replyText = `Oalah badhe mundhut ${itemMatched} nggih Nak? Puniki ${itemMatched}-ipun seger banget nembe rawuh saking petani. Reganipun mung gangsal ewu per bungkus. Badhe mundhut pinten bungkus?`;
+                } else if (lowerMsg.includes('sepulo') || lowerMsg.includes('10') || lowerMsg.includes('angsal') || lowerMsg.includes('tawar') || lowerMsg.includes('murah') || lowerMsg.includes('kurang') || lowerMsg.includes('dherek')) {
+                    replyText = 'Wah menawi semanten Mbok Bakul ngalap bathi sekedhik banget Nak. Pripun menawi dipungenepaken rolas ewu mawon, sampun dherek murah sanget nggih?';
+                } else if (lowerMsg.includes('setunggal') || lowerMsg.includes('kalih') || lowerMsg.includes('tiga') || lowerMsg.includes('bungkus') || lowerMsg.includes('kilo') || lowerMsg.includes('mawon')) {
+                    replyText = 'Nggih siap Nak, puniki pesananipun sampun dibuntel rapi. Wonten panyuwunan bumbu utawi jajan sanes ingkang badhe dipuntumbas?';
+                } else if (lowerMsg.includes('pinten') || lowerMsg.includes('rega') || lowerMsg.includes('biji') || lowerMsg.includes('pira') || lowerMsg.includes('piro')) {
+                    replyText = 'Menawi niki reganipun rolas ewu rupiyah per bungkus Nak. Seger-seger lan kualitasipun sae sanget kagem masak ing omah.';
+                } else if (lowerMsg.includes('matur nuwun') || lowerMsg.includes('suwun') || lowerMsg.includes('sampun') || lowerMsg.includes('kesah') || lowerMsg.includes('pamit') || lowerMsg.includes('mboten')) {
+                    replyText = 'Sami-sami Nak! Matur nuwun sanget sampun mampir lan belanja ing lapak Mbok Bakul. Mugi-mugi berkah lan slamet ing dalan nggih!';
+                } else if (lowerMsg.includes('sugeng') || lowerMsg.includes('halo') || lowerMsg.includes('pagi') || lowerMsg.includes('enjang') || lowerMsg.includes('siang')) {
+                    replyText = 'Sugeng enjang uga Nak! Lapak Mbok Bakul buka terus. Wonten sayur seger lan jajan pasar jangkep, badhe madosi napa dinten puniki?';
                 } else {
-                    replyText = `Nggih Nak, ngenani "${currentInput}", Mbok Bakul siap ngladosi. Menawi badhe mundhut sayur utawi bumbu sanesipun monggo.`;
+                    replyText = `Nggih Nak, monggo dipunpilih sayur seger lan bumbu ing lapak Mbok Bakul. Sedaya bahane berkualitas lan resik kagem masak kulawarga.`;
                 }
             } else if (activeRoleplayChar.id === 'simbah') {
                 if (lowerMsg.includes('kabar') || lowerMsg.includes('sehat')) {
-                    replyText = 'Alhamdulillah Simbah sehat Wal-afiat, Le/Nduk. Kepriye sekolah lan pasinaonmu dinten puniki?';
+                    replyText = 'Alhamdulillah Simbah sehat Wal-afiat, Le/Nduk. Kepriye sekolah lan pasinaonmu ing sekolah dinten puniki?';
+                } else if (lowerMsg.includes('sungkem') || lowerMsg.includes('pangestu') || lowerMsg.includes('pamit')) {
+                    replyText = 'Nggih Le/Nduk, Simbah tansah njurung donga pangestu. Mugi-mugi pasinaon lan cita-citamu dilancarake lan dibintangi berkah dening Gusti Allah.';
                 } else {
-                    replyText = `Matur nuwun ya Le/Nduk. Ngenani "${currentInput}", kita kudu tansah sregep njaga unggah-ungguh lan etika subasita Basa Jawa.`;
+                    replyText = `Matur nuwun ya Le/Nduk. Kita kudu tansah sregep njaga unggah-ungguh, etika subasita, lan tutur basa Jawa Krama ing ngendi wae berada.`;
                 }
             } else {
-                replyText = `Nggih, babagan "${currentInput}" puniki sampun trep. Monggo terus dipunlatih ketrampilan basa Jawa Krama ingkang bener!`;
+                if (lowerMsg.includes('tugas') || lowerMsg.includes('pr') || lowerMsg.includes('ujian') || lowerMsg.includes('soal')) {
+                    replyText = 'Nggih, ingkang sregep lan tliti anggonmu nggarap tugas Basa Jawa. Menawi wonten ingkang dereng faham, Bapak Guru siap mbantu jlentrehake.';
+                } else {
+                    replyText = `Nggih, ketrampilan wicara basa Jawa Krama puniki kedah terus dilatih kanthi rutin supados sangsaya fasih lan manut etika sosiokultural.`;
+                }
             }
         }
 
