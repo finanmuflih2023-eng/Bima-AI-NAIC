@@ -371,7 +371,7 @@ export default function StudentPwa({
         let replyText = '';
 
         try {
-            // 1. Integrasi API Generatif Groq Cloud LLM Real-time (Model GPT-OSS-120B)
+            // 1. Integrasi API Generatif Groq Cloud LLM Real-time (Model Candidate Fallback)
             const promptMessages = [
                 { role: 'system', content: charSystemPrompt },
                 ...updatedMessages.slice(-6).map(m => ({
@@ -380,24 +380,34 @@ export default function StudentPwa({
                 }))
             ];
 
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getGroqApiKey()}`
-                },
-                body: JSON.stringify({
-                    model: 'openai/gpt-oss-120b',
-                    messages: promptMessages,
-                    temperature: 0.7,
-                    max_tokens: 150
-                })
-            });
+            const candidateModels = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.choices && data.choices[0]?.message?.content) {
-                    replyText = data.choices[0].message.content.trim();
+            for (const modelId of candidateModels) {
+                try {
+                    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getGroqApiKey()}`
+                        },
+                        body: JSON.stringify({
+                            model: modelId,
+                            messages: promptMessages,
+                            temperature: 0.7,
+                            max_tokens: 500
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const content = data.choices && data.choices[0]?.message?.content;
+                        if (content && content.trim()) {
+                            replyText = content.trim();
+                            break; // Stop loop once we get a valid response
+                        }
+                    }
+                } catch (errInner) {
+                    console.warn(`Groq API model ${modelId} failed:`, errInner);
                 }
             }
         } catch (err) {
