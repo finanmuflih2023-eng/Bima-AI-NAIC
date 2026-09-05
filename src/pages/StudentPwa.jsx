@@ -21,8 +21,21 @@ export default function StudentPwa({
     onLeaveClass,
     onPostComment
 }) {
-    const [activeTab, setActiveTab] = useState('tasks'); // 'tasks' | 'stream' | 'history' | 'sandbox' | 'profile'
+    const [activeTab, setActiveTab] = useState(() => {
+        const path = window.location.pathname.toLowerCase();
+        const validStudentTabs = ['tasks', 'stream', 'roster', 'history', 'sandbox', 'profile'];
+        for (const t of validStudentTabs) {
+            if (path.includes(t)) return t;
+        }
+        return 'tasks';
+    });
     const [activeClassToken, setActiveClassToken] = useState(user?.token || 'BIMA-SMP9A');
+
+    useEffect(() => {
+        if (user?.token) {
+            setActiveClassToken(user.token);
+        }
+    }, [user?.token]);
     const [selectedTask, setSelectedTask] = useState(null);
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
@@ -554,6 +567,7 @@ export default function StudentPwa({
                                     key={t.id}
                                     onClick={() => {
                                         setActiveTab(t.id);
+                                        window.history.pushState(null, '', `/student/${t.id}`);
                                         setSelectedTask(null);
                                         setSpeechResult(null);
                                     }}

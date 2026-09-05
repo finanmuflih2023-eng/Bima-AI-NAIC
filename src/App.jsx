@@ -616,6 +616,7 @@ export default function App() {
 
     try {
       await supabase.from('class_enrollments').insert([newEnrollment]);
+      await supabase.from('students').update({ token: cleanToken }).eq('username', studentObj.username || studentObj.name);
     } catch (e) {
       console.warn("Supabase class_enrollments insert error");
     }
@@ -623,6 +624,17 @@ export default function App() {
     const updated = [...enrollments, newEnrollment];
     setEnrollments(updated);
     localStorage.setItem('bima_enrollments', JSON.stringify(updated));
+
+    if (user && userRole === 'student') {
+      const updatedUser = { ...user, token: cleanToken };
+      setUser(updatedUser);
+      localStorage.setItem('bima_auth_session', JSON.stringify({
+        user: updatedUser,
+        userRole: 'student',
+        currentTab: 'student',
+        loginTime: Date.now()
+      }));
+    }
   };
 
   const handleKickStudent = async (enrollmentId) => {
@@ -655,6 +667,17 @@ export default function App() {
     );
     setEnrollments(updated);
     localStorage.setItem('bima_enrollments', JSON.stringify(updated));
+
+    if (user && userRole === 'student') {
+      const updatedUser = { ...user, token: '' };
+      setUser(updatedUser);
+      localStorage.setItem('bima_auth_session', JSON.stringify({
+        user: updatedUser,
+        userRole: 'student',
+        currentTab: 'student',
+        loginTime: Date.now()
+      }));
+    }
   };
 
   // --- 10. CLASSROOM ANNOUNCEMENTS & COMMENTS HANDLERS ---

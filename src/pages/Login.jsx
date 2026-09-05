@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { LogIn, UserPlus, BookOpen, School, Mail, Lock, User, KeyRound } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
-export default function Login({ onLogin, onStudentLogin, classes }) {
-    const [userType, setUserType] = useState('teacher'); // 'teacher' | 'student'
+export default function Login({ onLogin, onStudentLogin, classes, defaultUserType = 'teacher' }) {
+    const [userType, setUserType] = useState(defaultUserType); // 'teacher' | 'student'
     const [isLoginTab, setIsLoginTab] = useState(true); // Untuk guru: Login vs Sign Up
     
     // Form Guru
@@ -163,7 +163,9 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
                 return;
             }
 
-            const cleanToken = classToken.trim().toUpperCase() || authenticatedStudent.token || 'BIMA-SMP9A';
+            const cleanToken = (authenticatedStudent.token && authenticatedStudent.token.trim())
+                ? authenticatedStudent.token.trim().toUpperCase()
+                : (classToken.trim().toUpperCase() || 'BIMA-SMP9A');
 
             onStudentLogin({
                 id: authenticatedStudent.id,
@@ -238,7 +240,10 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
                 <div className="flex bg-gray-50 border-b border-gray-100 p-1">
                     <button
                         type="button"
-                        onClick={() => setUserType('teacher')}
+                        onClick={() => {
+                            setUserType('teacher');
+                            window.history.pushState(null, '', '/login/guru');
+                        }}
                         className={`flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-2xl transition-all cursor-pointer ${
                             userType === 'teacher' 
                                 ? 'bg-amber-800 text-white shadow-sm' 
@@ -249,7 +254,10 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
                     </button>
                     <button
                         type="button"
-                        onClick={() => setUserType('student')}
+                        onClick={() => {
+                            setUserType('student');
+                            window.history.pushState(null, '', '/login/siswa');
+                        }}
                         className={`flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-2xl transition-all cursor-pointer ${
                             userType === 'student' 
                                 ? 'bg-amber-800 text-white shadow-sm' 
