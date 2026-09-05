@@ -532,8 +532,9 @@ export default function StudentPwa({
     };
 
     // Filter tasks & submissions
-    const activeTasks = tasks.filter(t => t.classToken === user.token);
-    const studentHistory = submissions.filter(s => s.classToken === user.token && s.studentName === user.name);
+    const activeClassTokenEffective = activeClassToken || user?.token || 'BIMA-SMP9A';
+    const activeTasks = tasks.filter(t => t.classToken === activeClassTokenEffective);
+    const studentHistory = submissions.filter(s => s.classToken === activeClassTokenEffective && (s.studentName === user.name || s.studentUsername === user.username));
 
     return (
         <div className="min-h-screen w-full bg-[#F8F9FA] flex flex-row font-sans text-gray-800 antialiased overflow-x-hidden">
@@ -810,8 +811,18 @@ export default function StudentPwa({
 
                 {/* HORIZONTAL STUDENT STATUS CARD (GAMIFICATION CARD) */}
                 {(() => {
-                    const currentClassObj = classes.find(c => c.token === activeClassToken) || classes.find(c => c.token === user.token) || classes[0];
-                    const classMembers = (enrollments || []).filter(e => e.class_token === (currentClassObj?.token || activeClassToken));
+                    const activeToken = activeClassToken || user?.token || 'BIMA-SMP9A';
+                    const matchedClass = classes.find(c => c.token === activeToken);
+                    const currentClassObj = matchedClass || {
+                        id: 'dyn-' + activeToken,
+                        title: `Kelas ${activeToken}`,
+                        level: 'SMP',
+                        token: activeToken,
+                        school_name: user?.school || 'Sekolah Penggerak',
+                        created_by: 'Guru Pengajar',
+                        students: (enrollments || []).filter(e => e.class_token === activeToken).length
+                    };
+                    const classMembers = (enrollments || []).filter(e => e.class_token === activeToken);
                     return (
                         <div className="bg-white border border-gray-200 rounded-3xl p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-2xs text-left">
                             <div>
@@ -820,26 +831,19 @@ export default function StudentPwa({
                                 </span>
                                 <h2 className="text-xl font-black text-gray-950 mt-1">{user.name} <span className="text-xs text-gray-400 font-mono">(@{user.username || 'siswa'})</span></h2>
                                 <p className="text-xs text-gray-500 font-semibold mt-0.5">
-                                    Pengajar: <strong className="text-gray-900">{currentClassObj?.created_by || 'Ki Hadjar'}</strong> • {currentClassObj?.school_name || 'SMP Negeri 1 Yogyakarta'} ({currentClassObj?.title || 'Kelas Basa Jawa'})
+                                    Pengajar: <strong className="text-gray-900">{currentClassObj?.created_by || 'Guru Pengajar'}</strong> • {currentClassObj?.school_name || 'Sekolah Penggerak'} ({currentClassObj?.title || 'Kelas Basa Jawa'})
                                 </p>
                                 <div className="mt-2 flex items-center gap-2 flex-wrap">
                                     <span className="text-[10px] text-gray-400 font-bold uppercase">Token Kelas:</span>
-                                    <span className="font-mono font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-xs">{currentClassObj?.token || user.token}</span>
+                                    <span className="font-mono font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-xs">{activeToken}</span>
                                     <button 
                                         onClick={() => {
                                             const token = prompt('Masukkan Token Kelas Baru dari Gurumu (Contoh: BIMA-SMP9A):');
                                             if (token && token.trim()) {
                                                 const cleanT = token.trim().toUpperCase();
-                                                const matched = classes.find(c => c.token === cleanT);
-                                                if (matched) {
-                                                    setActiveClassToken(cleanT);
-                                                    if (onJoinClass) onJoinClass(user, cleanT);
-                                                    alert(`Berhasil bergabung ke kelas "${matched.title}"!`);
-                                                } else {
-                                                    setActiveClassToken(cleanT);
-                                                    if (onJoinClass) onJoinClass(user, cleanT);
-                                                    alert(`Bergabung dengan token kelas "${cleanT}"!`);
-                                                }
+                                                setActiveClassToken(cleanT);
+                                                if (onJoinClass) onJoinClass(user, cleanT);
+                                                alert(`Berhasil berpindah ke token kelas "${cleanT}"!`);
                                             }
                                         }}
                                         className="text-[10px] bg-gray-100 hover:bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-lg font-bold border border-gray-200 transition cursor-pointer"
@@ -854,8 +858,8 @@ export default function StudentPwa({
                                     </button>
                                     <button 
                                         onClick={() => {
-                                            if (window.confirm(`Apakah Anda yakin ingin keluar dari kelas ${currentClassObj?.title || activeClassToken}?`)) {
-                                                if (onLeaveClass) onLeaveClass(user, activeClassToken);
+                                            if (window.confirm(`Apakah Anda yakin ingin keluar dari kelas ${currentClassObj?.title || activeToken}?`)) {
+                                                if (onLeaveClass) onLeaveClass(user, activeToken);
                                                 alert('Anda telah keluar dari kelas.');
                                                 const newToken = prompt('Masukkan Token Kelas Baru dari Gurumu untuk bergabung ke kelas baru:');
                                                 if (newToken && newToken.trim()) {
@@ -979,7 +983,8 @@ export default function StudentPwa({
 
                         <div className="flex flex-col gap-4">
                             {(() => {
-                                const classAnnouncements = (announcements || []).filter(a => a.class_token === activeClassToken || a.class_token === user.token);
+                                const activeToken = activeClassToken || user?.token || 'BIMA-SMP9A';
+                                const classAnnouncements = (announcements || []).filter(a => a.class_token === activeToken);
                                 if (classAnnouncements.length === 0) {
                                     return (
                                         <div className="bg-white border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center text-xs text-gray-400">
@@ -1040,8 +1045,18 @@ export default function StudentPwa({
                 {activeTab === 'roster' && (
                     <div className="flex flex-col gap-6 text-left">
                         {(() => {
-                            const currentClassObj = classes.find(c => c.token === activeClassToken) || classes.find(c => c.token === user.token) || classes[0];
-                            const classMembers = (enrollments || []).filter(e => e.class_token === (currentClassObj?.token || activeClassToken));
+                            const activeToken = activeClassToken || user?.token || 'BIMA-SMP9A';
+                            const matchedClass = classes.find(c => c.token === activeToken);
+                            const currentClassObj = matchedClass || {
+                                id: 'dyn-' + activeToken,
+                                title: `Kelas ${activeToken}`,
+                                level: 'SMP',
+                                token: activeToken,
+                                school_name: user?.school || 'Sekolah Penggerak',
+                                created_by: 'Guru Pengajar',
+                                students: (enrollments || []).filter(e => e.class_token === activeToken).length
+                            };
+                            const classMembers = (enrollments || []).filter(e => e.class_token === activeToken);
                             return (
                                 <>
                                     {/* Header Info Kelas & Guru */}

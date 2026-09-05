@@ -203,8 +203,15 @@ export default function Login({ onLogin, onStudentLogin, classes, defaultUserTyp
                 if (!error && inserted && inserted.length > 0) {
                     newStudent.id = inserted[0].id;
                 }
+
+                await supabase.from('class_enrollments').insert([{
+                    class_token: cleanToken,
+                    student_name: newStudent.name,
+                    student_username: newStudent.username,
+                    joined_at: new Date().toLocaleDateString('id-ID')
+                }]);
             } catch (err) {
-                console.warn("Supabase student signup fallback to LocalStorage");
+                console.warn("Supabase student signup fallback to LocalStorage", err);
             }
 
             const existingStudents = JSON.parse(localStorage.getItem('bima_registered_students') || '[]');

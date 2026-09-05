@@ -96,9 +96,80 @@ export default function App() {
     ];
   });
 
-  // --- 1. READ: Mengambil Data dari Supabase Saat Guru/Siswa Login ---
+  // --- 1. READ & SYNC REALTIME: Mengambil Data & Roster dari Supabase ---
+  const fetchEnrollments = async () => {
+    try {
+      const { data: enrData } = await supabase.from('class_enrollments').select('*');
+      const { data: stdData } = await supabase.from('students').select('*');
+
+      let combinedEnrollments = [];
+
+      if (stdData && stdData.length > 0) {
+        stdData.forEach(s => {
+          if (s.token && s.token.trim()) {
+            combinedEnrollments.push({
+              id: 'std-' + s.id,
+              class_token: s.token.trim().toUpperCase(),
+              student_name: s.name,
+              student_username: s.username || s.name,
+              joined_at: s.created_at ? new Date(s.created_at).toLocaleDateString('id-ID') : 'Terdaftar'
+            });
+          }
+        });
+      }
+
+      if (enrData && enrData.length > 0) {
+        enrData.forEach(e => {
+          if (e.class_token && e.class_token.trim()) {
+            combinedEnrollments.push({
+              id: e.id,
+              class_token: e.class_token.trim().toUpperCase(),
+              student_name: e.student_name,
+              student_username: e.student_username || e.student_name,
+              joined_at: e.joined_at || 'Terdaftar'
+            });
+          }
+        });
+      }
+
+      if (combinedEnrollments.length > 0) {
+        const uniqueMap = new Map();
+        combinedEnrollments.forEach(item => {
+          const key = `${item.class_token}_${(item.student_username || item.student_name).toLowerCase()}`;
+          if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, item);
+          }
+        });
+        const finalRoster = Array.from(uniqueMap.values());
+        setEnrollments(finalRoster);
+        localStorage.setItem('bima_enrollments', JSON.stringify(finalRoster));
+      }
+    } catch (e) {
+      console.warn("Failed to fetch enrollments from Supabase:", e);
+    }
+  };
+
+  const fetchAnnouncements = async () => {
+    try {
+      const { data, error } = await supabase.from('class_announcements').select('*').order('id', { ascending: false });
+      if (!error && data && data.length > 0) {
+        setAnnouncements(data);
+        localStorage.setItem('bima_announcements', JSON.stringify(data));
+      }
+    } catch (e) {}
+  };
+
+  const fetchComments = async () => {
+    try {
+      const { data, error } = await supabase.from('class_comments').select('*').order('id', { ascending: true });
+      if (!error && data && data.length > 0) {
+        setComments(data);
+        localStorage.setItem('bima_comments', JSON.stringify(data));
+      }
+    } catch (e) {}
+  };
+
   useEffect(() => {
-    // Jalankan pengambilan kelas (yang bersifat publik untuk verifikasi token siswa juga)
     const fetchClasses = async () => {
       const { data: classesData, error: classesError } = await supabase
         .from('classes')
@@ -116,7 +187,6 @@ export default function App() {
 
       let rawList = fallbackClasses;
       if (!classesError && classesData && classesData.length > 0) {
-        // Merge without duplicates by token
         const combined = [...classesData, ...customClasses];
         const uniqueMap = new Map();
         combined.forEach(c => uniqueMap.set(c.token, c));
@@ -128,7 +198,6 @@ export default function App() {
         rawList = Array.from(uniqueMap.values());
       }
 
-      // Teacher Class Isolation: Show 3 default classes ONLY for Ki Hadjar
       if (user && userRole === 'teacher') {
         const teacherName = user.name;
         if (teacherName === 'Ki Hadjar') {
@@ -139,12 +208,10 @@ export default function App() {
           );
           setClasses(isolated);
         } else {
-          // For other teachers: only show classes created by this teacher
           const teacherClasses = rawList.filter(c => c.created_by === teacherName);
           if (teacherClasses.length > 0) {
             setClasses(teacherClasses);
           } else {
-            // Auto create 1 starter default class with a random unique token
             const generateRandomToken = () => {
               const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
               let result = '';
@@ -182,6 +249,17 @@ export default function App() {
     };
 
     fetchClasses();
+    fetchEnrollments();
+    fetchAnnouncements();
+    fetchComments();
+
+    const interval = setInterval(() => {
+      fetchEnrollments();
+      fetchAnnouncements();
+      fetchComments();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [user, userRole]);
 
   // Fetch quizzes, released tasks, and student submissions
