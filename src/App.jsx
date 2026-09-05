@@ -10,11 +10,49 @@ import Login from './pages/Login';
 import StudentPwa from './pages/StudentPwa'; // Impor PWA Siswa
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState('teacher'); // 'teacher' | 'student'
+  // 6-Hour Session Persistence & URL Path Initializer
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('bima_auth_session');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const isExpired = Date.now() - (parsed.loginTime || 0) > 6 * 60 * 60 * 1000;
+        if (!isExpired && parsed.user) return parsed.user;
+      } catch (e) {}
+    }
+    return null;
+  });
+
+  const [userRole, setUserRole] = useState(() => {
+    const saved = localStorage.getItem('bima_auth_session');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const isExpired = Date.now() - (parsed.loginTime || 0) > 6 * 60 * 60 * 1000;
+        if (!isExpired && parsed.userRole) return parsed.userRole;
+      } catch (e) {}
+    }
+    return 'teacher';
+  });
+
   const [classes, setClasses] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
-  const [currentTab, setCurrentTab] = useState('dashboard');
+  
+  const [currentTab, setCurrentTab] = useState(() => {
+    const pathTab = window.location.pathname.replace('/', '').toLowerCase();
+    const validTabs = ['dashboard', 'classes', 'ai-generator', 'analytics', 'settings'];
+    if (validTabs.includes(pathTab)) return pathTab;
+
+    const saved = localStorage.getItem('bima_auth_session');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.currentTab && validTabs.includes(parsed.currentTab)) return parsed.currentTab;
+      } catch (e) {}
+    }
+    return 'dashboard';
+  });
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedClassId, setSelectedClassId] = useState(null);
   
@@ -90,15 +128,54 @@ export default function App() {
         rawList = Array.from(uniqueMap.values());
       }
 
-      // Teacher Class Isolation: Show 3 default classes + classes created by CURRENT teacher only
+      // Teacher Class Isolation: Show 3 default classes ONLY for Ki Hadjar
       if (user && userRole === 'teacher') {
         const teacherName = user.name;
-        const isolated = rawList.filter(c => 
-          c.is_default || 
-          ['BIMA-SMP9A', 'BIMA-SMP9B', 'BIMA-SMP9C'].includes(c.token) || 
-          c.created_by === teacherName
-        );
-        setClasses(isolated);
+        if (teacherName === 'Ki Hadjar') {
+          const isolated = rawList.filter(c => 
+            c.is_default || 
+            ['BIMA-SMP9A', 'BIMA-SMP9B', 'BIMA-SMP9C'].includes(c.token) || 
+            c.created_by === 'Ki Hadjar'
+          );
+          setClasses(isolated);
+        } else {
+          // For other teachers: only show classes created by this teacher
+          const teacherClasses = rawList.filter(c => c.created_by === teacherName);
+          if (teacherClasses.length > 0) {
+            setClasses(teacherClasses);
+          } else {
+            // Auto create 1 starter default class with a random unique token
+            const generateRandomToken = () => {
+              const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+              let result = '';
+              for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+              }
+              return `BIMA-${result}`;
+            };
+            const starterToken = generateRandomToken();
+            const starterClass = {
+              id: Date.now(),
+              title: `Kelas Basa Jawa (${teacherName})`,
+              level: 'SMP',
+              school_type: 'Negeri',
+              token: starterToken,
+              school_name: user.school || 'SMP Negeri 1 Yogyakarta',
+              students: 0,
+              latest: 'Belum ada asesmen',
+              progress: 0,
+              created_by: teacherName
+            };
+            try {
+              supabase.from('classes').insert([starterClass]);
+            } catch (e) {}
+
+            const existingCustom = JSON.parse(localStorage.getItem('bima_custom_classes') || '[]');
+            localStorage.setItem('bima_custom_classes', JSON.stringify([...existingCustom, starterClass]));
+
+            setClasses([starterClass]);
+          }
+        }
       } else {
         setClasses(rawList);
       }
@@ -202,11 +279,60 @@ export default function App() {
     fetchStudentSubmissions();
   }, [user, userRole]);
 
+  // Dynamic URL Router & 6-Hour Session Sync
+  const handleTabChange = (tabName) => {
+    setCurrentTab(tabName);
+    if (userRole === 'teacher') {
+      window.history.pushState(null, '', `/${tabName}`);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('bima_auth_session', JSON.stringify({
+        user,
+        userRole,
+        currentTab,
+        loginTime: Date.now()
+      }));
+    }
+  }, [user, userRole, currentTab]);
+
+  useEffect(() => {
+    if (user && userRole === 'teacher') {
+      const validTabs = ['dashboard', 'classes', 'ai-generator', 'analytics', 'settings'];
+      if (validTabs.includes(currentTab)) {
+        window.history.replaceState(null, '', `/${currentTab}`);
+      }
+    } else if (user && userRole === 'student') {
+      window.history.replaceState(null, '', '/student');
+    }
+  }, [user, userRole, currentTab]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const pathTab = window.location.pathname.replace('/', '').toLowerCase();
+      const validTabs = ['dashboard', 'classes', 'ai-generator', 'analytics', 'settings'];
+      if (validTabs.includes(pathTab)) {
+        setCurrentTab(pathTab);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // --- 2. AUTHENTICATION ---
   const handleLogin = (userData) => {
     setUser(userData);
     setUserRole('teacher');
     setCurrentTab('dashboard');
+    window.history.pushState(null, '', '/dashboard');
+    localStorage.setItem('bima_auth_session', JSON.stringify({
+      user: userData,
+      userRole: 'teacher',
+      currentTab: 'dashboard',
+      loginTime: Date.now()
+    }));
   };
 
   const handleStudentLogin = (studentData) => {
@@ -219,6 +345,13 @@ export default function App() {
     };
     setUser(studentUser);
     setUserRole('student');
+    window.history.pushState(null, '', '/student');
+    localStorage.setItem('bima_auth_session', JSON.stringify({
+      user: studentUser,
+      userRole: 'student',
+      currentTab: 'student',
+      loginTime: Date.now()
+    }));
 
     // Auto-enroll student into token class roster if not already enrolled
     if (studentData.token) {
@@ -236,6 +369,8 @@ export default function App() {
   const handleLogout = () => {
     setUser(null);
     setUserRole('teacher');
+    localStorage.removeItem('bima_auth_session');
+    window.history.pushState(null, '', '/');
   };
 
   // --- 3. CREATE CLASS ---
@@ -629,7 +764,7 @@ export default function App() {
   // Paket data props yang dibagikan ke komponen Sidebar dan Halaman Guru
   const sharedProps = {
     currentTab,
-    setCurrentTab,
+    setCurrentTab: handleTabChange,
     isSidebarOpen,
     setIsSidebarOpen,
     handleLogout,

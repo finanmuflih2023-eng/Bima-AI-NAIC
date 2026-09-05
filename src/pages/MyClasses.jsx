@@ -2,13 +2,21 @@ import React, { useState } from 'react';
 import { Search, Plus, Filter, LayoutGrid, List, Users, ArrowLeft, Trash2 } from 'lucide-react';
 
 export default function MyClasses({
-    classes,
+    classes = [],
     selectedClassId,
     setSelectedClassId,
     onDeleteClass,
     user,
     tasks = [],
-    onDeleteTask
+    onDeleteTask,
+    enrollments = [],
+    announcements = [],
+    comments = [],
+    submissions = [],
+    onKickStudent,
+    onPostAnnouncement,
+    onPostComment,
+    onUpdateSubmission
 }) {
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
