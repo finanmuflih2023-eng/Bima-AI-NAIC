@@ -180,9 +180,9 @@ export default function App() {
       const customClasses = localCustom ? JSON.parse(localCustom) : [];
 
       const fallbackClasses = [
-        { id: 1, title: 'Kelas 9A - Sesi Remen Basa', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9A', school_name: 'SMP Negeri 1 Yogyakarta', students: 3, latest: 'Evaluasi Pacelathon Ibu', progress: 71, is_default: true },
-        { id: 2, title: 'Kelas 9B - Gladhen Krama', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9B', school_name: 'SMP Negeri 1 Yogyakarta', students: 1, latest: 'Tuku Buku ing Toko (Krama Lugu)', progress: 55, is_default: true },
-        { id: 3, title: 'Kelas 9C - Aksara Jawa', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9C', school_name: 'SMP Negeri 1 Yogyakarta', students: 0, latest: 'Belum ada asesmen', progress: 0, is_default: true }
+        { id: 1, title: 'Kelas 9A - Sesi Remen Basa', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9A', school_name: 'SMP Negeri 1 Yogyakarta', students: 3, latest: 'Evaluasi Pacelathon Ibu', progress: 71, is_default: true, created_by: 'Ki Hadjar' },
+        { id: 2, title: 'Kelas 9B - Gladhen Krama', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9B', school_name: 'SMP Negeri 1 Yogyakarta', students: 1, latest: 'Tuku Buku ing Toko (Krama Lugu)', progress: 55, is_default: true, created_by: 'Ki Hadjar' },
+        { id: 3, title: 'Kelas 9C - Aksara Jawa', level: 'SMP', school_type: 'Negeri', token: 'BIMA-SMP9C', school_name: 'SMP Negeri 1 Yogyakarta', students: 0, latest: 'Belum ada asesmen', progress: 0, is_default: true, created_by: 'Ki Hadjar' }
       ];
 
       let rawList = fallbackClasses;
@@ -196,6 +196,27 @@ export default function App() {
         const uniqueMap = new Map();
         combined.forEach(c => uniqueMap.set(c.token, c));
         rawList = Array.from(uniqueMap.values());
+      }
+
+      // Auto-sync missing classes to Supabase classes table
+      if (rawList.length > 0) {
+        for (const cls of rawList) {
+          if (!classesData?.some(dbC => dbC.token === cls.token)) {
+            try {
+              await supabase.from('classes').insert([{
+                title: cls.title,
+                level: cls.level,
+                school_type: cls.school_type || cls.schoolType || 'Negeri',
+                token: cls.token,
+                school_name: cls.school_name || cls.schoolName || user?.school || 'Sekolah Penggerak',
+                students: cls.students || 0,
+                latest: cls.latest || 'Belum ada asesmen',
+                progress: cls.progress || 0,
+                created_by: cls.created_by || user?.name || 'Guru Pengajar'
+              }]);
+            } catch (e) {}
+          }
+        }
       }
 
       if (user && userRole === 'teacher') {
@@ -221,20 +242,23 @@ export default function App() {
               return `BIMA-${result}`;
             };
             const starterToken = generateRandomToken();
-            const starterClass = {
-              id: Date.now(),
+            const starterClassObj = {
               title: `Kelas Basa Jawa (${teacherName})`,
               level: 'SMP',
               school_type: 'Negeri',
               token: starterToken,
-              school_name: user.school || 'SMP Negeri 1 Yogyakarta',
+              school_name: user.school || 'Sekolah Jawa',
               students: 0,
               latest: 'Belum ada asesmen',
               progress: 0,
               created_by: teacherName
             };
+            let starterClass = starterClassObj;
             try {
-              supabase.from('classes').insert([starterClass]);
+              const { data: insertedClass } = await supabase.from('classes').insert([starterClassObj]).select();
+              if (insertedClass && insertedClass.length > 0) {
+                starterClass = insertedClass[0];
+              }
             } catch (e) {}
 
             const existingCustom = JSON.parse(localStorage.getItem('bima_custom_classes') || '[]');
@@ -254,6 +278,7 @@ export default function App() {
     fetchComments();
 
     const interval = setInterval(() => {
+      fetchClasses();
       fetchEnrollments();
       fetchAnnouncements();
       fetchComments();
@@ -280,33 +305,92 @@ export default function App() {
           .select('*')
           .order('id', { ascending: false });
 
-        if (!error && data) {
-          // Map snake_case to camelCase
-          const mapped = data.map(t => ({
-            id: t.id,
-            classToken: t.class_token,
-            title: t.title,
-            scenario: t.scenario,
-            level: t.level,
-            context: t.context,
-            correctTranscript: t.correct_transcript,
-            audioStimulus: t.audio_stimulus,
-            audioNativeExample: t.correct_transcript
-          }));
-          setTasks(mapped);
-          localStorage.setItem('bima_tasks', JSON.stringify(mapped));
-        } else {
-          throw new Error(error?.message || "Fetch failed");
+        let currentTasks = data || [];
+
+        // Preset oral tasks generator for seeding
+        const defaultPresetTasks = (token) => [
+          {
+            class_token: token,
+            title: 'Nyuwun Pangapunten',
+            scenario: 'Nalika murid mlebu kelas, guru lagi ngrembug materi. Murid pengin nyuwun pangapunten amargi telat mlebu kelas lan nyuwun izin lungguh.',
+            level: 'Krama Alus',
+            context: 'murid-guru',
+            correct_transcript: 'Nyuwun pangapunten Pak Guru, kula telat amargi jawah. Kula nyuwun izin mlebet.',
+            audio_stimulus: 'Nyuwun pangapunten Pak Guru, kula telat amargi jawah. Kula nyuwun izin mlebet.'
+          },
+          {
+            class_token: token,
+            title: 'Nyuwun Izin Mlebet WC',
+            scenario: 'Nalika pelajaran lagi mlaku, murid krasa kenging kahanan darurat lan perlu mlebe WC.',
+            level: 'Krama Alus',
+            context: 'murid-guru',
+            correct_transcript: 'Nyuwun izin Pak Guru, kula badhe dhateng belekas sebentar.',
+            audio_stimulus: 'Nyuwun izin Pak Guru, kula badhe dhateng belekas sebentar.'
+          },
+          {
+            class_token: token,
+            title: 'Njaluk Penjelasan',
+            scenario: 'Guru nerangake tugas rumah, nanging murid ora mangertos sawetawis pitakonan.',
+            level: 'Krama Alus',
+            context: 'murid-guru',
+            correct_transcript: 'Nyuwun pangapunten Pak Guru, menapa saged njlentrehaken malih babagan tugas ingkang angka kalih?',
+            audio_stimulus: 'Nyuwun pangapunten Pak Guru, menapa saged njlentrehaken malih babagan tugas ingkang angka kalih?'
+          },
+          {
+            class_token: token,
+            title: 'Nyuwun Saran',
+            scenario: 'Murid badhe nyuwun saran dhumateng guru ngenani persiapan lomba basa jawa.',
+            level: 'Krama Alus',
+            context: 'murid-guru',
+            correct_transcript: 'Matur nuwun Pak Guru, napa wonten pituduh saha saran supados kula saged maksimal ing lomba?',
+            audio_stimulus: 'Matur nuwun Pak Guru, napa wonten pituduh saha saran supados kula saged maksimal ing lomba?'
+          },
+          {
+            class_token: token,
+            title: 'Pamit Mulih Sekolah',
+            scenario: 'Pelajaran sampun rampung, murid badhe pamit mulih dhumateng guru.',
+            level: 'Krama Alus',
+            context: 'murid-guru',
+            correct_transcript: 'Sugeng siyang Pak Guru, kula pamit wangsul dhumateng dalem dhisik.',
+            audio_stimulus: 'Sugeng siyang Pak Guru, kula pamit wangsul dhumateng dalem dhisik.'
+          }
+        ];
+
+        // Seed tasks for active tokens if missing in Supabase
+        const tokensToEnsure = Array.from(new Set([
+          ...(classes || []).map(c => c.token),
+          user?.token,
+          'BIMA-SMP9A',
+          'BIMA-EWGRZ4'
+        ].filter(Boolean)));
+
+        for (const tok of tokensToEnsure) {
+          const hasTask = currentTasks.some(t => t.class_token === tok);
+          if (!hasTask) {
+            try {
+              const { data: seeded } = await supabase.from('released_tasks').insert(defaultPresetTasks(tok)).select();
+              if (seeded && seeded.length > 0) {
+                currentTasks = [...seeded, ...currentTasks];
+              }
+            } catch (e) {}
+          }
         }
+
+        const mapped = currentTasks.map(t => ({
+          id: t.id,
+          classToken: t.class_token,
+          title: t.title,
+          scenario: t.scenario,
+          level: t.level,
+          context: t.context,
+          correctTranscript: t.correct_transcript,
+          audioStimulus: t.audio_stimulus,
+          audioNativeExample: t.correct_transcript
+        }));
+        setTasks(mapped);
+        localStorage.setItem('bima_tasks', JSON.stringify(mapped));
       } catch (e) {
-        console.warn("Table 'released_tasks' not found or empty. Using LocalStorage fallback.");
-        const local = localStorage.getItem('bima_tasks');
-        if (local) {
-          setTasks(JSON.parse(local));
-        } else {
-          // Initialize empty for tasks to ensure we start clean (tasks only show if released by teacher)
-          setTasks([]);
-        }
+        console.warn("Table 'released_tasks' fetch error:", e);
       }
     };
 
@@ -890,6 +974,7 @@ export default function App() {
           <Dashboard
             {...sharedProps}
             classes={classes}
+            enrollments={enrollments}
             quizzesCount={quizzes.length}
             onCreateClass={handleCreateClass}
           />

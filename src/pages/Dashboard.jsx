@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Users, BookOpen, GraduationCap, ArrowRight } from 'lucide-react';
 import ClassModal from '../components/ClassModal'; // 1. Impor komponen modal baru
 
-export default function Dashboard({ user, classes, quizzesCount, onCreateClass, setCurrentTab, setSelectedClassId }) {
+export default function Dashboard({ user, classes, enrollments = [], quizzesCount, onCreateClass, setCurrentTab, setSelectedClassId }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [copiedToken, setCopiedToken] = useState(null);
 
@@ -60,24 +60,26 @@ export default function Dashboard({ user, classes, quizzesCount, onCreateClass, 
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {classes.map((item) => (
-                        <div
-                            key={item.id}
-                            className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden flex flex-col justify-between group hover:shadow-md hover:border-amber-200/60 transition-all duration-300"
-                        >
-                            {/* Bagian Utama Kartu */}
-                            <div className="p-5 flex-1 flex flex-col justify-between">
-                                <div>
-                                    {/* Baris Atas: Badge Jenjang & Jumlah Siswa */}
-                                    <div className="flex justify-between items-center mb-4">
-                                        <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">
-                                            {item.level} • {item.school_type}
-                                        </span>
-                                        <span className="bg-gray-50 text-gray-500 text-[11px] font-semibold px-2 py-1 rounded-lg flex items-center gap-1.5 border border-gray-100/80">
-                                            <Users size={13} className="text-gray-400" />
-                                            {item.students} Siswa
-                                        </span>
-                                    </div>
+                    {classes.map((item) => {
+                        const classStudentsCount = (enrollments || []).filter(e => e.class_token === item.token).length;
+                        return (
+                            <div
+                                key={item.id}
+                                className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden flex flex-col justify-between group hover:shadow-md hover:border-amber-200/60 transition-all duration-300"
+                            >
+                                {/* Bagian Utama Kartu */}
+                                <div className="p-5 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        {/* Baris Atas: Badge Jenjang & Jumlah Siswa */}
+                                        <div className="flex justify-between items-center mb-4">
+                                            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                                                {item.level} • {item.school_type}
+                                            </span>
+                                            <span className="bg-gray-50 text-gray-500 text-[11px] font-semibold px-2 py-1 rounded-lg flex items-center gap-1.5 border border-gray-100/80">
+                                                <Users size={13} className="text-gray-400" />
+                                                {classStudentsCount} Siswa
+                                            </span>
+                                        </div>
 
                                     {/* Detail Nama Kelas & Sekolah */}
                                     <div className="mb-4">
@@ -143,7 +145,8 @@ export default function Dashboard({ user, classes, quizzesCount, onCreateClass, 
                                 <ArrowRight size={14} className="transform group-hover/btn:translate-x-1 transition-transform duration-200" />
                             </button>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
