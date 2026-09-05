@@ -114,48 +114,81 @@ Kembalikan HANYA JSON array persis sesuai format.`;
 
         let generatedFromLLM = false;
 
-        const candidateModels = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
+        const aiMessages = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+        ];
 
-        for (const modelId of candidateModels) {
-            try {
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getGroqApiKey()}`
-                    },
-                    body: JSON.stringify({
-                        model: modelId,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: userPrompt }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 1200
-                    })
-                });
+        // Primary: Vercel Serverless Proxy /api/chat
+        try {
+            const apiRes = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: aiMessages,
+                    max_tokens: 1200
+                })
+            });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    const content = data.choices && data.choices[0]?.message?.content;
-                    if (content && content.trim()) {
-                        // Extract JSON if wrapped in markdown blocks
-                        const cleanJsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim();
-                        const parsedData = JSON.parse(cleanJsonStr);
-                        if (Array.isArray(parsedData) && parsedData.length > 0) {
-                            // Ensure each question has a unique ID
-                            const formatted = parsedData.map((q, idx) => ({
-                                ...q,
-                                id: `draft-${Date.now()}-${idx + 1}`
-                            }));
-                            setDraftQuestions(formatted);
-                            generatedFromLLM = true;
-                            break; // Stop loop on success
-                        }
+            if (apiRes.ok) {
+                const apiData = await apiRes.json();
+                if (apiData.reply && apiData.reply.trim()) {
+                    const cleanJsonStr = apiData.reply.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const parsedData = JSON.parse(cleanJsonStr);
+                    if (Array.isArray(parsedData) && parsedData.length > 0) {
+                        const formatted = parsedData.map((q, idx) => ({
+                            ...q,
+                            id: `draft-${Date.now()}-${idx + 1}`
+                        }));
+                        setDraftQuestions(formatted);
+                        generatedFromLLM = true;
                     }
                 }
-            } catch (error) {
-                console.warn(`Groq LLM generator error for ${modelId}:`, error);
+            }
+        } catch (proxyErr) {
+            console.warn("Vercel Serverless /api/chat failed in AiGenerator, attempting direct Groq API fetch:", proxyErr);
+        }
+
+        // Fallback: Direct Groq API Client Fetch
+        if (!generatedFromLLM) {
+            const candidateModels = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
+
+            for (const modelId of candidateModels) {
+                try {
+                    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getGroqApiKey()}`
+                        },
+                        body: JSON.stringify({
+                            model: modelId,
+                            messages: aiMessages,
+                            temperature: 0.7,
+                            max_tokens: 1200
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const content = data.choices && data.choices[0]?.message?.content;
+                        if (content && content.trim()) {
+                            const cleanJsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim();
+                            const parsedData = JSON.parse(cleanJsonStr);
+                            if (Array.isArray(parsedData) && parsedData.length > 0) {
+                                const formatted = parsedData.map((q, idx) => ({
+                                    ...q,
+                                    id: `draft-${Date.now()}-${idx + 1}`
+                                }));
+                                setDraftQuestions(formatted);
+                                generatedFromLLM = true;
+                                break;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`Groq LLM generator error for ${modelId}:`, error);
+                }
             }
         }
 
