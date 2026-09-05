@@ -210,13 +210,27 @@ export default function App() {
   };
 
   const handleStudentLogin = (studentData) => {
-    setUser({
+    const studentUser = {
       id: 'student-' + Date.now(),
       name: studentData.name,
+      username: studentData.username || studentData.name,
       role: 'Student',
       token: studentData.token
-    });
+    };
+    setUser(studentUser);
     setUserRole('student');
+
+    // Auto-enroll student into token class roster if not already enrolled
+    if (studentData.token) {
+      const cleanToken = studentData.token.trim().toUpperCase();
+      const isAlreadyEnrolled = enrollments.some(e => 
+        e.class_token === cleanToken && 
+        (e.student_name === studentData.name || e.student_username === (studentData.username || studentData.name))
+      );
+      if (!isAlreadyEnrolled) {
+        handleJoinClass(studentUser, cleanToken);
+      }
+    }
   };
 
   const handleLogout = () => {

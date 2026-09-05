@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
     BookOpen, Sparkles, Award, Mic, MicOff, Volume2, Play, Pause, 
     ArrowLeft, Check, AlertCircle, X, ChevronRight, User, Trophy, 
-    Send, RefreshCw, Zap, History, Star, LogOut
+    Send, RefreshCw, Zap, History, Star, LogOut, Users
 } from 'lucide-react';
 import { getGroqApiKey } from '../groqConfig';
 
@@ -541,6 +541,7 @@ export default function StudentPwa({
                         {[
                             { id: 'tasks', label: 'Tugas Lisan', icon: BookOpen },
                             { id: 'stream', label: 'Pengumuman Kelas', icon: Zap },
+                            { id: 'roster', label: 'Teman Sekelas', icon: Users },
                             { id: 'history', label: 'Riwayat Asesmen', icon: History },
                             { id: 'sandbox', label: 'AI Sandbox Chat', icon: Sparkles },
                             { id: 'profile', label: 'Pencapaian', icon: Trophy }
@@ -795,6 +796,7 @@ export default function StudentPwa({
                 {/* HORIZONTAL STUDENT STATUS CARD (GAMIFICATION CARD) */}
                 {(() => {
                     const currentClassObj = classes.find(c => c.token === activeClassToken) || classes.find(c => c.token === user.token) || classes[0];
+                    const classMembers = (enrollments || []).filter(e => e.class_token === (currentClassObj?.token || activeClassToken));
                     return (
                         <div className="bg-white border border-gray-200 rounded-3xl p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-2xs text-left">
                             <div>
@@ -803,9 +805,9 @@ export default function StudentPwa({
                                 </span>
                                 <h2 className="text-xl font-black text-gray-950 mt-1">{user.name} <span className="text-xs text-gray-400 font-mono">(@{user.username || 'siswa'})</span></h2>
                                 <p className="text-xs text-gray-500 font-semibold mt-0.5">
-                                    Pengajar: <strong className="text-gray-900">{currentClassObj?.created_by || 'Ki Hadjar'}</strong> • {currentClassObj?.school_name || 'SMP Negeri 1 Yogyakarta'}
+                                    Pengajar: <strong className="text-gray-900">{currentClassObj?.created_by || 'Ki Hadjar'}</strong> • {currentClassObj?.school_name || 'SMP Negeri 1 Yogyakarta'} ({currentClassObj?.title || 'Kelas Basa Jawa'})
                                 </p>
-                                <div className="mt-2 flex items-center gap-2">
+                                <div className="mt-2 flex items-center gap-2 flex-wrap">
                                     <span className="text-[10px] text-gray-400 font-bold uppercase">Token Kelas:</span>
                                     <span className="font-mono font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-xs">{currentClassObj?.token || user.token}</span>
                                     <button 
@@ -828,6 +830,12 @@ export default function StudentPwa({
                                         className="text-[10px] bg-gray-100 hover:bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-lg font-bold border border-gray-200 transition cursor-pointer"
                                     >
                                         + Gabung Kelas Baru
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveTab('roster')}
+                                        className="text-[10px] bg-amber-100 hover:bg-amber-200 text-amber-950 px-2.5 py-0.5 rounded-lg font-black border border-amber-300 transition cursor-pointer flex items-center gap-1"
+                                    >
+                                        <Users size={12} /> {classMembers.length} Teman Sekelas
                                     </button>
                                 </div>
                             </div>
@@ -993,6 +1001,100 @@ export default function StudentPwa({
                                 });
                             })()}
                         </div>
+                    </div>
+                )}
+
+                {/* TAB WINDOW: TEMAN SEKELAS & ROSTER KELAS */}
+                {activeTab === 'roster' && (
+                    <div className="flex flex-col gap-6 text-left">
+                        {(() => {
+                            const currentClassObj = classes.find(c => c.token === activeClassToken) || classes.find(c => c.token === user.token) || classes[0];
+                            const classMembers = (enrollments || []).filter(e => e.class_token === (currentClassObj?.token || activeClassToken));
+                            return (
+                                <>
+                                    {/* Header Info Kelas & Guru */}
+                                    <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-2xs flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-14 h-14 bg-[#3E2723] rounded-2xl flex items-center justify-center text-white text-2xl font-black shrink-0">
+                                                👨‍🏫
+                                            </div>
+                                            <div>
+                                                <span className="text-[9px] font-black text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                                    Ruang Kelas Aktif Siswa
+                                                </span>
+                                                <h3 className="text-lg font-black text-gray-950 mt-1">{currentClassObj?.title || 'Kelas Basa Jawa'}</h3>
+                                                <p className="text-xs text-gray-500 font-semibold mt-0.5">
+                                                    Guru Pengajar: <strong className="text-gray-900">{currentClassObj?.created_by || 'Ki Hadjar'}</strong> • {currentClassObj?.school_name || 'SMP Negeri 1 Yogyakarta'}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-amber-50 border border-amber-200/70 px-4 py-3 rounded-2xl flex items-center gap-3">
+                                            <div className="text-left">
+                                                <span className="text-[9px] font-bold text-amber-800 uppercase block">Token Kelas</span>
+                                                <span className="font-mono font-black text-sm text-amber-950">{currentClassObj?.token || activeClassToken}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Section Header Teman Sekelas */}
+                                    <div className="flex justify-between items-center pl-1 border-b border-gray-200 pb-3 mt-2">
+                                        <div>
+                                            <h3 className="text-sm font-black text-gray-950 uppercase tracking-wider">Daftar Teman Sekelas ({classMembers.length} Siswa)</h3>
+                                            <p className="text-xs text-gray-400 mt-0.5">Semua siswa yang telah terhubung menggunakan token kelas ini.</p>
+                                        </div>
+                                        <span className="text-xxs font-bold text-amber-900 bg-amber-100 border border-amber-200 px-3 py-1 rounded-xl">
+                                            👥 Total {classMembers.length} Anggota
+                                        </span>
+                                    </div>
+
+                                    {/* Grid Roster Siswa */}
+                                    {classMembers.length === 0 ? (
+                                        <div className="bg-white border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center text-xs text-gray-400">
+                                            Belum ada teman sekelas yang terhubung ke token ini.
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {classMembers.map((member, idx) => {
+                                                const isCurrentUser = (user.username && member.student_username === user.username) || member.student_name === user.name;
+                                                return (
+                                                    <div 
+                                                        key={member.id || idx}
+                                                        className={`bg-white border rounded-2xl p-4 shadow-2xs flex items-center justify-between transition-all ${
+                                                            isCurrentUser ? 'border-amber-500 bg-amber-50/40 ring-1 ring-amber-300' : 'border-gray-200 hover:border-amber-200'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm ${
+                                                                isCurrentUser ? 'bg-amber-800 text-white' : 'bg-gray-100 text-gray-700'
+                                                            }`}>
+                                                                {member.student_name ? member.student_name.charAt(0).toUpperCase() : 'S'}
+                                                            </div>
+                                                            <div>
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <h4 className="font-extrabold text-xs text-gray-900">{member.student_name}</h4>
+                                                                    {isCurrentUser && (
+                                                                        <span className="text-[8px] font-black bg-amber-700 text-white px-1.5 py-0.2 rounded">Anda</span>
+                                                                    )}
+                                                                </div>
+                                                                <p className="text-[10px] text-gray-400 font-mono mt-0.5">@{member.student_username || 'siswa'}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="text-right">
+                                                            <span className="text-[9px] text-emerald-700 bg-emerald-50 border border-emerald-100 font-bold px-2 py-0.5 rounded-full inline-block">
+                                                                Aktif
+                                                            </span>
+                                                            <span className="block text-[8px] text-gray-400 mt-1">{member.joined_at || 'Terdaftar'}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
                     </div>
                 )}
 
