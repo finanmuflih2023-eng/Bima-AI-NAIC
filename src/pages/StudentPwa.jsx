@@ -13,9 +13,15 @@ export default function StudentPwa({
     submissions = [], 
     onAddSubmission, 
     onLogout, 
-    onSwitchToTeacher 
+    onSwitchToTeacher,
+    enrollments = [],
+    announcements = [],
+    comments = [],
+    onJoinClass,
+    onPostComment
 }) {
-    const [activeTab, setActiveTab] = useState('tasks'); // 'tasks' | 'history' | 'sandbox' | 'profile'
+    const [activeTab, setActiveTab] = useState('tasks'); // 'tasks' | 'stream' | 'history' | 'sandbox' | 'profile'
+    const [activeClassToken, setActiveClassToken] = useState(user?.token || 'BIMA-SMP9A');
     const [selectedTask, setSelectedTask] = useState(null);
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
@@ -534,6 +540,7 @@ export default function StudentPwa({
                     <nav className="flex flex-col gap-2 w-full text-left">
                         {[
                             { id: 'tasks', label: 'Tugas Lisan', icon: BookOpen },
+                            { id: 'stream', label: 'Pengumuman Kelas', icon: Zap },
                             { id: 'history', label: 'Riwayat Asesmen', icon: History },
                             { id: 'sandbox', label: 'AI Sandbox Chat', icon: Sparkles },
                             { id: 'profile', label: 'Pencapaian', icon: Trophy }
@@ -786,34 +793,66 @@ export default function StudentPwa({
                 )}
 
                 {/* HORIZONTAL STUDENT STATUS CARD (GAMIFICATION CARD) */}
-                <div className="bg-white border border-gray-200 rounded-3xl p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-2xs text-left">
-                    <div>
-                        <span className="text-[9px] font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded uppercase">
-                            Ruang Belajar Siswa
-                        </span>
-                        <h2 className="text-xl font-black text-gray-950 mt-1">{user.name}</h2>
-                        <p className="text-xs text-gray-400 font-semibold">SMP Negeri 1 Yogyakarta • Kelas Token: <span className="font-mono text-amber-900 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">{user.token}</span></p>
-                    </div>
-                    
-                    {/* XP Progress indicator */}
-                    <div className="flex items-center gap-4 min-w-[280px] w-full md:w-auto">
-                        <div className="w-11 h-11 bg-amber-700 rounded-2xl flex items-center justify-center text-xl text-white font-bold shrink-0">
-                            {lvlInfo.badge}
-                        </div>
-                        <div className="flex-1">
-                            <div className="flex justify-between text-xxs font-black text-gray-400 uppercase mb-1">
-                                <span>Pangkat: {lvlInfo.name}</span>
-                                <span>{studentXp} / {lvlInfo.nextXp} XP</span>
+                {(() => {
+                    const currentClassObj = classes.find(c => c.token === activeClassToken) || classes.find(c => c.token === user.token) || classes[0];
+                    return (
+                        <div className="bg-white border border-gray-200 rounded-3xl p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-2xs text-left">
+                            <div>
+                                <span className="text-[9px] font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded uppercase">
+                                    Ruang Belajar Siswa Terverifikasi
+                                </span>
+                                <h2 className="text-xl font-black text-gray-950 mt-1">{user.name} <span className="text-xs text-gray-400 font-mono">(@{user.username || 'siswa'})</span></h2>
+                                <p className="text-xs text-gray-500 font-semibold mt-0.5">
+                                    Pengajar: <strong className="text-gray-900">{currentClassObj?.created_by || 'Ki Hadjar'}</strong> • {currentClassObj?.school_name || 'SMP Negeri 1 Yogyakarta'}
+                                </p>
+                                <div className="mt-2 flex items-center gap-2">
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase">Token Kelas:</span>
+                                    <span className="font-mono font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-xs">{currentClassObj?.token || user.token}</span>
+                                    <button 
+                                        onClick={() => {
+                                            const token = prompt('Masukkan Token Kelas Baru dari Gurumu (Contoh: BIMA-SMP9A):');
+                                            if (token && token.trim()) {
+                                                const cleanT = token.trim().toUpperCase();
+                                                const matched = classes.find(c => c.token === cleanT);
+                                                if (matched) {
+                                                    setActiveClassToken(cleanT);
+                                                    if (onJoinClass) onJoinClass(user, cleanT);
+                                                    alert(`Berhasil bergabung ke kelas "${matched.title}"!`);
+                                                } else {
+                                                    setActiveClassToken(cleanT);
+                                                    if (onJoinClass) onJoinClass(user, cleanT);
+                                                    alert(`Bergabung dengan token kelas "${cleanT}"!`);
+                                                }
+                                            }
+                                        }}
+                                        className="text-[10px] bg-gray-100 hover:bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-lg font-bold border border-gray-200 transition cursor-pointer"
+                                    >
+                                        + Gabung Kelas Baru
+                                    </button>
+                                </div>
                             </div>
-                            <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden p-[1px]">
-                                <div 
-                                    className="bg-amber-700 h-full rounded-full transition-all" 
-                                    style={{ width: `${(studentXp / lvlInfo.nextXp) * 100}%` }}
-                                ></div>
+                            
+                            {/* XP Progress indicator */}
+                            <div className="flex items-center gap-4 min-w-[280px] w-full md:w-auto">
+                                <div className="w-11 h-11 bg-amber-700 rounded-2xl flex items-center justify-center text-xl text-white font-bold shrink-0">
+                                    {lvlInfo.badge}
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex justify-between text-xxs font-black text-gray-400 uppercase mb-1">
+                                        <span>Pangkat: {lvlInfo.name}</span>
+                                        <span>{studentXp} / {lvlInfo.nextXp} XP</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden p-[1px]">
+                                        <div 
+                                            className="bg-amber-700 h-full rounded-full transition-all" 
+                                            style={{ width: `${(studentXp / lvlInfo.nextXp) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    );
+                })()}
 
                 {/* TAB WINDOW: ACTIVE TASKS */}
                 {activeTab === 'tasks' && !selectedTask && (
@@ -882,6 +921,78 @@ export default function StudentPwa({
                                 })}
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* TAB WINDOW: STREAM PENGUMUMAN KELAS */}
+                {activeTab === 'stream' && (
+                    <div className="flex flex-col gap-6 text-left">
+                        <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-2xs">
+                            <span className="text-[9px] font-black bg-amber-100 text-amber-900 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                Pengumuman & Diskusi Kelas
+                            </span>
+                            <h3 className="text-base font-black text-gray-900 mt-3 leading-tight">Stream Kelas Guru</h3>
+                            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                                Lihat pengumuman terbaru dari gurumu dan berikan komentar diskusi di bawahnya.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col gap-4">
+                            {(() => {
+                                const classAnnouncements = (announcements || []).filter(a => a.class_token === activeClassToken || a.class_token === user.token);
+                                if (classAnnouncements.length === 0) {
+                                    return (
+                                        <div className="bg-white border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center text-xs text-gray-400">
+                                            Belum ada pengumuman dari guru di kelas ini.
+                                        </div>
+                                    );
+                                }
+                                return classAnnouncements.map((ann) => {
+                                    const annComments = (comments || []).filter(c => c.announcement_id === ann.id);
+                                    return (
+                                        <div key={ann.id} className="bg-white border border-gray-200 rounded-3xl p-6 shadow-2xs">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="font-extrabold text-sm text-gray-900">{ann.teacher_name}</span>
+                                                <span className="text-[10px] text-gray-400">{ann.created_at}</span>
+                                            </div>
+                                            <p className="text-xs text-gray-700 leading-relaxed bg-amber-50/50 p-3 rounded-2xl border border-amber-100/60 mb-4">{ann.content}</p>
+
+                                            <div className="border-t border-gray-100 pt-3 flex flex-col gap-2">
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase">Komentar Siswa ({annComments.length})</span>
+                                                {annComments.map((c) => (
+                                                    <div key={c.id} className="bg-gray-50 p-3 rounded-xl border border-gray-150 text-xs">
+                                                        <span className="font-bold text-gray-900">{c.author_name}</span>: <span className="text-gray-700">{c.content}</span>
+                                                    </div>
+                                                ))}
+
+                                                <form 
+                                                    onSubmit={(e) => {
+                                                        e.preventDefault();
+                                                        const commText = e.target.elements.studentCommText.value;
+                                                        if (commText.trim() && onPostComment) {
+                                                            onPostComment(ann.id, user.name, commText.trim());
+                                                            e.target.reset();
+                                                        }
+                                                    }}
+                                                    className="flex gap-2 mt-2"
+                                                >
+                                                    <input 
+                                                        type="text" 
+                                                        name="studentCommText" 
+                                                        required 
+                                                        placeholder="Tulis komentar kamu..." 
+                                                        className="flex-1 text-xs p-2.5 border border-gray-250 rounded-xl bg-gray-50 focus:outline-none focus:ring-1 focus:ring-amber-700"
+                                                    />
+                                                    <button type="submit" className="bg-[#3E2723] hover:bg-amber-950 text-white font-bold px-4 py-2.5 rounded-xl text-xxs transition cursor-pointer">
+                                                        Kirim Komentar
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    );
+                                });
+                            })()}
+                        </div>
                     </div>
                 )}
 

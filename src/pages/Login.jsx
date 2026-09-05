@@ -13,7 +13,10 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
     const [password, setPassword] = useState('');
 
     // Form Siswa
+    const [isStudentLoginTab, setIsStudentLoginTab] = useState(true);
     const [studentName, setStudentName] = useState('');
+    const [studentUsername, setStudentUsername] = useState('');
+    const [studentPassword, setStudentPassword] = useState('');
     const [classToken, setClassToken] = useState('');
 
     const handleSubmitTeacher = async (e) => {
@@ -114,48 +117,106 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
 
     const handleSubmitStudent = async (e) => {
         e.preventDefault();
-        if (!studentName.trim() || !classToken.trim()) {
-            alert('Mohon isi nama lengkap dan token kelas Anda!');
-            return;
-        }
-
-        const cleanToken = classToken.trim().toUpperCase();
-
-        // Cari token kelas secara real-time dari database Supabase
-        const { data: matchedClass, error } = await supabase
-            .from('classes')
-            .select('*')
-            .eq('token', cleanToken)
-            .maybeSingle();
-
-        if (error) {
-            console.error("Gagal memverifikasi token dari database:", error.message);
-        }
-
-        if (!matchedClass) {
-            // Fallback untuk kemudahan demonstrasi jika offline/database kosong
-            const localCustom = JSON.parse(localStorage.getItem('bima_custom_classes') || '[]');
-            const allLocalClasses = [...classes, ...localCustom];
-            const localMatch = allLocalClasses.find(c => c.token.toUpperCase() === cleanToken);
-            if (localMatch) {
-                onStudentLogin({
-                    name: studentName.trim(),
-                    token: localMatch.token
-                });
+        
+        if (isStudentLoginTab) {
+            // LOGIN SISWA
+            if (!studentUsername.trim() || !studentPassword.trim()) {
+                alert('Mohon isi Username / NIS dan Kata Sandi Anda!');
                 return;
             }
 
-            alert(
-                `Token kelas "${classToken}" tidak terdaftar di database!\n\n` +
-                `Silakan tanyakan token kelas yang valid kepada gurumu.`
-            );
-            return;
-        }
+            let data = null;
+            try {
+                const res = await supabase
+                    .from('students')
+                    .select('*')
+                    .eq('username', studentUsername.trim())
+                    .eq('password', studentPassword.trim())
+                    .maybeSingle();
+                data = res.data;
+            } catch (err) {
+                console.warn("Supabase student fetch error, using local fallback");
+            }
 
-        onStudentLogin({
-            name: studentName.trim(),
-            token: matchedClass.token
-        });
+            let authenticatedStudent = data;
+
+            if (!authenticatedStudent) {
+                const localStudents = JSON.parse(localStorage.getItem('bima_registered_students') || '[]');
+                const matched = localStudents.find(s => 
+                    (s.username.toLowerCase() === studentUsername.trim().toLowerCase() || s.name.toLowerCase() === studentUsername.trim().toLowerCase()) && 
+                    s.password === studentPassword.trim()
+                );
+                if (matched) {
+                    authenticatedStudent = matched;
+                } else if (studentUsername === 'budi' && studentPassword === '123456') {
+                    authenticatedStudent = {
+                        id: 'stud-1',
+                        name: 'Budi Santoso',
+                        username: 'budi',
+                        token: classToken.trim().toUpperCase() || 'BIMA-SMP9A'
+                    };
+                }
+            }
+
+            if (!authenticatedStudent) {
+                alert('Login Siswa Gagal! Username/NIS atau Kata Sandi salah.');
+                return;
+            }
+
+            const cleanToken = classToken.trim().toUpperCase() || authenticatedStudent.token || 'BIMA-SMP9A';
+
+            onStudentLogin({
+                id: authenticatedStudent.id,
+                name: authenticatedStudent.name,
+                username: authenticatedStudent.username,
+                token: cleanToken
+            });
+        } else {
+            // PENDAFTARAN AKUN SISWA BARU
+            if (!studentName.trim() || !studentUsername.trim() || !studentPassword.trim() || !classToken.trim()) {
+                alert('Mohon isi semua kolom pendaftaran siswa dan token kelas!');
+                return;
+            }
+
+            const cleanToken = classToken.trim().toUpperCase();
+
+            const newStudent = {
+                id: 'student-' + Date.now(),
+                name: studentName.trim(),
+                username: studentUsername.trim(),
+                password: studentPassword.trim(),
+                token: cleanToken
+            };
+
+            try {
+                const { data: inserted, error } = await supabase
+                    .from('students')
+                    .insert([{
+                        name: newStudent.name,
+                        username: newStudent.username,
+                        password: newStudent.password,
+                        token: cleanToken
+                    }])
+                    .select();
+                if (!error && inserted && inserted.length > 0) {
+                    newStudent.id = inserted[0].id;
+                }
+            } catch (err) {
+                console.warn("Supabase student signup fallback to LocalStorage");
+            }
+
+            const existingStudents = JSON.parse(localStorage.getItem('bima_registered_students') || '[]');
+            localStorage.setItem('bima_registered_students', JSON.stringify([...existingStudents, newStudent]));
+
+            alert(`Pendaftaran Akun Siswa "${newStudent.name}" Berhasil!`);
+
+            onStudentLogin({
+                id: newStudent.id,
+                name: newStudent.name,
+                username: newStudent.username,
+                token: cleanToken
+            });
+        }
     };
 
     return (
@@ -297,53 +358,108 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
                     </div>
                 )}
 
-                {/* FORM SISWA (JOIN VIA TOKEN) */}
+                {/* FORM SISWA (AUTHENTICATED LOGIN & SIGNUP) */}
                 {userType === 'student' && (
-                    <form onSubmit={handleSubmitStudent} className="p-7 flex flex-col gap-5 text-left">
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Nama Lengkap Siswa</label>
-                            <div className="relative">
-                                <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-450" />
-                                <input
-                                    type="text"
-                                    required
-                                    placeholder="Contoh: Budi Santoso"
-                                    value={studentName}
-                                    onChange={(e) => setStudentName(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-250 bg-gray-50 text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-700"
-                                />
-                            </div>
+                    <div className="p-7 flex flex-col gap-4 text-left">
+                        {/* Sub-tab: Login Siswa vs Daftar Siswa */}
+                        <div className="flex border-b border-gray-150 pb-2 mb-2 gap-4">
+                            <button
+                                type="button"
+                                onClick={() => setIsStudentLoginTab(true)}
+                                className={`text-xs font-bold uppercase tracking-wider pb-1 transition cursor-pointer ${
+                                    isStudentLoginTab
+                                        ? 'text-amber-800 border-b-2 border-amber-800 font-black'
+                                        : 'text-gray-400 hover:text-gray-600'
+                                }`}
+                            >
+                                Masuk Siswa
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsStudentLoginTab(false)}
+                                className={`text-xs font-bold uppercase tracking-wider pb-1 transition cursor-pointer ${
+                                    !isStudentLoginTab
+                                        ? 'text-amber-800 border-b-2 border-amber-800 font-black'
+                                        : 'text-gray-400 hover:text-gray-600'
+                                }`}
+                            >
+                                Daftar Akun Baru
+                            </button>
                         </div>
 
-                        <div className="flex flex-col gap-2">
-                            <div className="flex justify-between items-center">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Token Kelas Guru</label>
-                                <span className="text-[9px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded">BIMA-SMP9A</span>
-                            </div>
-                            <div className="relative">
-                                <KeyRound size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-455" />
-                                <input
-                                    type="text"
-                                    required
-                                    placeholder="BIMA-XXXXXX"
-                                    value={classToken}
-                                    onChange={(e) => setClassToken(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-250 bg-gray-50 text-xs font-mono font-bold tracking-wider text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-700 uppercase"
-                                />
-                            </div>
-                        </div>
+                        <form onSubmit={handleSubmitStudent} className="flex flex-col gap-4">
+                            {!isStudentLoginTab && (
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Nama Lengkap Siswa</label>
+                                    <div className="relative">
+                                        <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-450" />
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="Contoh: Budi Santoso"
+                                            value={studentName}
+                                            onChange={(e) => setStudentName(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-250 bg-gray-50 text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-700"
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
-                        <div className="bg-amber-50/50 rounded-xl p-3 border border-amber-100 text-xxs text-amber-900 leading-normal font-medium">
-                            * Mintalah Token Kelas kepada Gurumu untuk mengakses tugas lisan dan materi wicara mandiri.
-                        </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Username / NIS</label>
+                                <div className="relative">
+                                    <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-450" />
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="username_siswa atau NIS"
+                                        value={studentUsername}
+                                        onChange={(e) => setStudentUsername(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-250 bg-gray-50 text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-700"
+                                    />
+                                </div>
+                            </div>
 
-                        <button
-                            type="submit"
-                            className="w-full bg-amber-750 hover:bg-[#2D1B18] text-white font-black py-3 rounded-xl text-xs transition uppercase tracking-wider shadow-md cursor-pointer"
-                        >
-                            Masuk Portal Belajar Siswa
-                        </button>
-                    </form>
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Kata Sandi</label>
+                                <div className="relative">
+                                    <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-455" />
+                                    <input
+                                        type="password"
+                                        required
+                                        placeholder="••••••••"
+                                        value={studentPassword}
+                                        onChange={(e) => setStudentPassword(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-250 bg-gray-50 text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-700"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Token Kelas Guru (Opsional/Bisa Diisi Nanti)</label>
+                                    <span className="text-[9px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded">BIMA-SMP9A</span>
+                                </div>
+                                <div className="relative">
+                                    <KeyRound size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-455" />
+                                    <input
+                                        type="text"
+                                        placeholder="BIMA-XXXXXX"
+                                        value={classToken}
+                                        onChange={(e) => setClassToken(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-250 bg-gray-50 text-xs font-mono font-bold tracking-wider text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-700 uppercase"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="w-full bg-amber-750 hover:bg-[#2D1B18] text-white font-black py-3 rounded-xl text-xs transition uppercase tracking-wider shadow-md cursor-pointer mt-2"
+                            >
+                                {isStudentLoginTab ? 'Masuk Portal Belajar Siswa' : 'Daftar & Masuk Portal Siswa'}
+                            </button>
+                        </form>
+                    </div>
                 )}
 
             </div>

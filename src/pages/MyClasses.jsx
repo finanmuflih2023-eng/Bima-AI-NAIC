@@ -56,18 +56,88 @@ export default function MyClasses({
                     </button>
                 </div>
 
-                {/* Split grid: Student Registry vs Released Tasks */}
+        // Filter enrollments, announcements, & submissions for active class token
+        const classEnrollments = (enrollments || []).filter(e => e.class_token === activeClass.token);
+        const classAnnouncements = (announcements || []).filter(a => a.class_token === activeClass.token);
+        const classSubmissions = (submissions || []).filter(s => s.classToken === activeClass.token);
+
+        return (
+            <div className="p-8 text-left font-sans text-gray-800 antialiased w-full">
+                {/* Tombol Navigasi Kembali */}
+                <button
+                    onClick={() => setSelectedClassId(null)}
+                    className="text-xxs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-1 hover:text-amber-800 transition cursor-pointer"
+                >
+                    <ArrowLeft size={12} /> Kembali ke semua kelas
+                </button>
+
+                {/* Header Manajemen Kelas */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl border border-gray-200 shadow-xs gap-4 w-full">
+                    <div>
+                        <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                            {activeClass.level} • {activeClass.school_type}
+                        </span>
+                        <h1 className="text-2xl font-black text-gray-900 mt-2 tracking-tight">{activeClass.title}</h1>
+                        <p className="text-xs text-gray-400 font-medium mt-1">
+                            {activeClass.school_name} • Pengajar: <strong className="text-gray-700">{activeClass.created_by || user?.name}</strong> • Token Akses: <span className="font-mono font-black text-amber-900 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">{activeClass.token}</span>
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            if (confirm(`Apakah Anda yakin ingin menghapus kelas "${activeClass.title}"?`)) {
+                                onDeleteClass(activeClass.id);
+                                setSelectedClassId(null);
+                            }
+                        }}
+                        className="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2.5 rounded-xl text-xs active:scale-95 transition-all duration-200 shadow-2xs cursor-pointer flex items-center gap-2"
+                    >
+                        <Trash2 size={14} />
+                        Hapus Kelas
+                    </button>
+                </div>
+
+                {/* Split grid: Student Roster vs Released Tasks */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     
-                    {/* Card 1: Students registry */}
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs text-center flex flex-col justify-center py-10">
-                        <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-800 mx-auto mb-3">
-                            <Users size={24} />
+                    {/* Card 1: Class Roster & Kick Student */}
+                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs text-left">
+                        <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+                            <h3 className="font-bold text-sm text-gray-800 uppercase tracking-wider flex items-center gap-2">
+                                <Users size={16} className="text-amber-800" />
+                                Daftar Siswa Terdaftar ({classEnrollments.length})
+                            </h3>
+                            <span className="text-xxs text-amber-800 bg-amber-50 px-2 py-0.5 rounded font-mono font-bold">
+                                {activeClass.token}
+                            </span>
                         </div>
-                        <h3 className="font-bold text-sm text-gray-800 mb-1">Daftar Siswa ({activeClass.students} Terdaftar)</h3>
-                        <p className="text-xs text-gray-400 max-w-xs mx-auto leading-relaxed">
-                            Siswa dapat bergabung ke kelas ini dengan memasukkan token kelas di atas pada portal wicara siswa.
-                        </p>
+
+                        {classEnrollments.length === 0 ? (
+                            <p className="text-xs text-gray-450 italic text-center py-8">
+                                Belum ada siswa yang mendaftar menggunakan token kelas ini.
+                            </p>
+                        ) : (
+                            <div className="flex flex-col gap-2 max-h-[260px] overflow-y-auto pr-1">
+                                {classEnrollments.map((enr) => (
+                                    <div key={enr.id} className="bg-gray-50/80 border border-gray-150 rounded-xl p-3 flex justify-between items-center">
+                                        <div>
+                                            <h4 className="text-xs font-bold text-gray-900">{enr.student_name}</h4>
+                                            <p className="text-[10px] text-gray-400 font-mono">@{enr.student_username} • Bergabung: {enr.joined_at}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                if (confirm(`Keluarkan siswa "${enr.student_name}" dari kelas ini?`)) {
+                                                    onKickStudent(enr.id);
+                                                }
+                                            }}
+                                            className="bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition"
+                                        >
+                                            Keluarkan
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Card 2: Released Javanese Tasks */}
@@ -81,7 +151,7 @@ export default function MyClasses({
                                 Belum ada tugas wicara yang dirilis ke kelas ini. Gunakan AI Generator untuk merilis soal baru.
                             </p>
                         ) : (
-                            <div className="flex flex-col gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+                            <div className="flex flex-col gap-2.5 max-h-[260px] overflow-y-auto pr-1">
                                 {activeTasks.map((t) => (
                                     <div key={t.id} className="bg-gray-50/70 border border-gray-100 rounded-xl p-3 flex justify-between items-start gap-4">
                                         <div className="min-w-0 flex-1">
@@ -112,6 +182,147 @@ export default function MyClasses({
                     </div>
 
                 </div>
+
+                {/* Section 3: Classroom Stream / Pengumuman & Komentar */}
+                <div className="mt-6 bg-white rounded-2xl border border-gray-200 p-6 shadow-xs text-left">
+                    <h3 className="font-bold text-sm text-gray-900 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">
+                        📢 Pengumuman & Diskusi Stream Kelas
+                    </h3>
+
+                    {/* Form Tulis Pengumuman */}
+                    <form 
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            const content = e.target.elements.annContent.value;
+                            if (content.trim()) {
+                                onPostAnnouncement(activeClass.token, content.trim());
+                                e.target.reset();
+                            }
+                        }}
+                        className="flex flex-col gap-2 mb-6"
+                    >
+                        <textarea
+                            name="annContent"
+                            required
+                            rows="2"
+                            placeholder="Tulis pesan atau pengumuman untuk siswa di kelas ini..."
+                            className="w-full text-xs p-3 border border-gray-250 rounded-xl bg-gray-50 focus:outline-none focus:ring-1 focus:ring-amber-700"
+                        />
+                        <button 
+                            type="submit"
+                            className="self-end bg-amber-800 hover:bg-amber-950 text-white font-bold px-4 py-2 rounded-xl text-xxs transition cursor-pointer"
+                        >
+                            Kirim Pengumuman
+                        </button>
+                    </form>
+
+                    {/* List Pengumuman */}
+                    <div className="flex flex-col gap-4">
+                        {classAnnouncements.length === 0 ? (
+                            <p className="text-xs text-gray-400 italic">Belum ada pengumuman di kelas ini.</p>
+                        ) : (
+                            classAnnouncements.map((ann) => {
+                                const annComments = (comments || []).filter(c => c.announcement_id === ann.id);
+                                return (
+                                    <div key={ann.id} className="bg-amber-50/40 border border-amber-100 rounded-xl p-4 text-xs">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="font-bold text-amber-900">{ann.teacher_name}</span>
+                                            <span className="text-[10px] text-gray-400">{ann.created_at}</span>
+                                        </div>
+                                        <p className="text-gray-800 text-xs leading-relaxed">{ann.content}</p>
+
+                                        {/* Diskusi Komentar */}
+                                        <div className="mt-3 pt-3 border-t border-amber-200/50 flex flex-col gap-2">
+                                            {annComments.map((c) => (
+                                                <div key={c.id} className="bg-white p-2.5 rounded-lg border border-gray-150 text-xxs">
+                                                    <span className="font-bold text-gray-900">{c.author_name}</span>: <span className="text-gray-700">{c.content}</span>
+                                                </div>
+                                            ))}
+
+                                            {/* Input komentar guru */}
+                                            <form 
+                                                onSubmit={(e) => {
+                                                    e.preventDefault();
+                                                    const commText = e.target.elements.commText.value;
+                                                    if (commText.trim()) {
+                                                        onPostComment(ann.id, user?.name || 'Guru', commText.trim());
+                                                        e.target.reset();
+                                                    }
+                                                }}
+                                                className="flex gap-2 mt-1"
+                                            >
+                                                <input 
+                                                    type="text" 
+                                                    name="commText" 
+                                                    required 
+                                                    placeholder="Balas komentar..." 
+                                                    className="flex-1 text-xxs p-2 border border-gray-200 rounded-lg bg-white"
+                                                />
+                                                <button type="submit" className="bg-amber-800 text-white font-bold px-3 py-1 rounded-lg text-xxs">
+                                                    Kirim
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+
+                {/* Section 4: Submission Score Override & Teacher Manual Feedback */}
+                <div className="mt-6 bg-white rounded-2xl border border-gray-200 p-6 shadow-xs text-left">
+                    <h3 className="font-bold text-sm text-gray-900 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">
+                        📝 Penilaian Tugas Siswa & Override Nilai Guru ({classSubmissions.length})
+                    </h3>
+
+                    {classSubmissions.length === 0 ? (
+                        <p className="text-xs text-gray-400 italic">Belum ada hasil pengumpulan tugas siswa di kelas ini.</p>
+                    ) : (
+                        <div className="flex flex-col gap-3">
+                            {classSubmissions.map((sub) => (
+                                <div key={sub.id} className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="font-extrabold text-gray-900">{sub.studentName}</span>
+                                            <span className="text-[10px] text-gray-400">• Tugas: {sub.taskTitle}</span>
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-black ${sub.score >= 75 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                                                Nilai: {sub.score}%
+                                            </span>
+                                        </div>
+                                        <p className="text-gray-600 italic text-xxs mb-1">"{sub.transcript}"</p>
+                                        {sub.teacherComment && (
+                                            <p className="text-amber-900 bg-amber-50 border border-amber-200 p-1.5 rounded text-xxs font-semibold">
+                                                💬 Komentar Guru: {sub.teacherComment}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <button
+                                        onClick={() => {
+                                            const newScore = prompt(`Ubah Nilai Keseluruhan untuk ${sub.studentName} (Saat ini: ${sub.score}%):`, sub.score);
+                                            if (newScore !== null) {
+                                                const scoreNum = parseInt(newScore, 10);
+                                                const comment = prompt(`Beri Catatan / Komentar Manual Guru untuk ${sub.studentName}:`, sub.teacherComment || '');
+                                                if (!isNaN(scoreNum)) {
+                                                    onUpdateSubmission(sub.id, {
+                                                        score: scoreNum,
+                                                        teacherComment: comment || ''
+                                                    });
+                                                    alert('Nilai dan komentar guru berhasil diperbarui!');
+                                                }
+                                            }
+                                        }}
+                                        className="bg-amber-800 hover:bg-amber-950 text-white font-bold px-3 py-2 rounded-xl text-xxs shrink-0 cursor-pointer"
+                                    >
+                                        ✏️ Ubah Nilai & Komentar
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
             </div>
         );
     }

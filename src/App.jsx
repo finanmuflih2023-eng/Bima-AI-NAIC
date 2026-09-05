@@ -21,6 +21,42 @@ export default function App() {
   // Shared state untuk integrasi real-time Guru & Siswa
   const [tasks, setTasks] = useState([]);
   const [studentSubmissions, setStudentSubmissions] = useState([]);
+  
+  // Google Classroom-style state: Enrollments, Announcements, & Comments
+  const [enrollments, setEnrollments] = useState(() => {
+    const local = localStorage.getItem('bima_enrollments');
+    return local ? JSON.parse(local) : [
+      { id: 'enr-1', class_token: 'BIMA-SMP9A', student_name: 'Budi Santoso', student_username: 'budi', joined_at: '01/09/2026' },
+      { id: 'enr-2', class_token: 'BIMA-SMP9A', student_name: 'Siti Aminah', student_username: 'siti', joined_at: '02/09/2026' },
+      { id: 'enr-3', class_token: 'BIMA-SMP9A', student_name: 'Rudi Hartono', student_username: 'rudi', joined_at: '03/09/2026' }
+    ];
+  });
+
+  const [announcements, setAnnouncements] = useState(() => {
+    const local = localStorage.getItem('bima_announcements');
+    return local ? JSON.parse(local) : [
+      { 
+        id: 'ann-1', 
+        class_token: 'BIMA-SMP9A', 
+        teacher_name: 'Ki Hadjar', 
+        content: 'Sugeng enjang para siswa. Asesmen wicara bab Krama Alus ing pasar wis dibuka. Silakan kerjakan tugas lisan di portal siswa!', 
+        created_at: '04/09/2026 08:00' 
+      }
+    ];
+  });
+
+  const [comments, setComments] = useState(() => {
+    const local = localStorage.getItem('bima_comments');
+    return local ? JSON.parse(local) : [
+      {
+        id: 'comm-1',
+        announcement_id: 'ann-1',
+        author_name: 'Budi Santoso',
+        content: 'Sugeng enjang Pak Guru, siap nggarap tugas wicara!',
+        created_at: '04/09/2026 08:15'
+      }
+    ];
+  });
 
   // --- 1. READ: Mengambil Data dari Supabase Saat Guru/Siswa Login ---
   useEffect(() => {
@@ -418,6 +454,112 @@ export default function App() {
     localStorage.setItem('bima_tasks', JSON.stringify(updated));
   };
 
+  // --- 9. CLASS ENROLLMENTS & KICK STUDENT HANDLERS ---
+  const handleJoinClass = async (studentObj, token) => {
+    const cleanToken = token.trim().toUpperCase();
+    const newEnrollment = {
+      id: 'enr-' + Date.now(),
+      class_token: cleanToken,
+      student_name: studentObj.name,
+      student_username: studentObj.username || studentObj.name,
+      joined_at: new Date().toLocaleDateString('id-ID')
+    };
+
+    try {
+      await supabase.from('class_enrollments').insert([newEnrollment]);
+    } catch (e) {
+      console.warn("Supabase class_enrollments insert error");
+    }
+
+    const updated = [...enrollments, newEnrollment];
+    setEnrollments(updated);
+    localStorage.setItem('bima_enrollments', JSON.stringify(updated));
+  };
+
+  const handleKickStudent = async (enrollmentId) => {
+    try {
+      await supabase.from('class_enrollments').delete().eq('id', enrollmentId);
+    } catch (e) {
+      console.warn("Supabase kick student error");
+    }
+
+    const updated = enrollments.filter(e => e.id !== enrollmentId);
+    setEnrollments(updated);
+    localStorage.setItem('bima_enrollments', JSON.stringify(updated));
+    alert('Siswa berhasil dikeluarkan dari daftar kelas!');
+  };
+
+  // --- 10. CLASSROOM ANNOUNCEMENTS & COMMENTS HANDLERS ---
+  const handlePostAnnouncement = async (classToken, content) => {
+    const newAnn = {
+      id: 'ann-' + Date.now(),
+      class_token: classToken,
+      teacher_name: user?.name || 'Ki Hadjar',
+      content: content,
+      created_at: new Date().toLocaleString('id-ID')
+    };
+
+    try {
+      await supabase.from('class_announcements').insert([newAnn]);
+    } catch (e) {
+      console.warn("Supabase announcement insert error");
+    }
+
+    const updated = [newAnn, ...announcements];
+    setAnnouncements(updated);
+    localStorage.setItem('bima_announcements', JSON.stringify(updated));
+  };
+
+  const handlePostComment = async (announcementId, authorName, content) => {
+    const newComm = {
+      id: 'comm-' + Date.now(),
+      announcement_id: announcementId,
+      author_name: authorName,
+      content: content,
+      created_at: new Date().toLocaleString('id-ID')
+    };
+
+    try {
+      await supabase.from('class_comments').insert([newComm]);
+    } catch (e) {
+      console.warn("Supabase comment insert error");
+    }
+
+    const updated = [...comments, newComm];
+    setComments(updated);
+    localStorage.setItem('bima_comments', JSON.stringify(updated));
+  };
+
+  // --- 11. TEACHER SCORE OVERRIDE & MANUAL COMMENT HANDLER ---
+  const handleUpdateSubmission = async (submissionId, updatedFields) => {
+    const updatedSubmissions = studentSubmissions.map(sub => {
+      if (sub.id === submissionId) {
+        return {
+          ...sub,
+          ...updatedFields,
+          score: updatedFields.score !== undefined ? updatedFields.score : sub.score,
+          teacherComment: updatedFields.teacherComment !== undefined ? updatedFields.teacherComment : sub.teacherComment
+        };
+      }
+      return sub;
+    });
+
+    setStudentSubmissions(updatedSubmissions);
+    localStorage.setItem('bima_submissions', JSON.stringify(updatedSubmissions));
+
+    try {
+      await supabase
+        .from('student_submissions')
+        .update({
+          score: updatedFields.score,
+          teacher_comment: updatedFields.teacherComment
+        })
+        .eq('id', submissionId);
+    } catch (e) {
+      console.warn("Supabase submission update error");
+    }
+  };
+
   const handleUpdateUser = (updatedData) => {
     setUser(prev => ({
       ...prev,
@@ -441,6 +583,11 @@ export default function App() {
         onAddSubmission={handleAddSubmission}
         onLogout={handleLogout}
         onSwitchToTeacher={() => setUserRole('teacher')}
+        enrollments={enrollments}
+        announcements={announcements}
+        comments={comments}
+        onJoinClass={handleJoinClass}
+        onPostComment={handlePostComment}
       />
     );
   }
@@ -486,6 +633,14 @@ export default function App() {
             user={user}
             tasks={tasks}
             onDeleteTask={handleDeleteTask}
+            submissions={studentSubmissions}
+            enrollments={enrollments}
+            announcements={announcements}
+            comments={comments}
+            onKickStudent={handleKickStudent}
+            onPostAnnouncement={handlePostAnnouncement}
+            onPostComment={handlePostComment}
+            onUpdateSubmission={handleUpdateSubmission}
           />
         )}
         {currentTab === 'ai-generator' && (
