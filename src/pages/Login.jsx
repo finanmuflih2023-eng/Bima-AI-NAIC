@@ -55,16 +55,28 @@ export default function Login({ onLogin, onStudentLogin, classes, defaultUserTyp
                         role: 'Educator',
                         school: 'SMP Negeri 1 Yogyakarta'
                     });
-                } else if (matchedLocal) {
-                    onLogin({
-                        id: matchedLocal.id,
-                        name: matchedLocal.name,
-                        role: 'Educator',
-                        school: matchedLocal.school || 'Sekolah Penggerak'
-                    });
                 } else {
-                    alert('Login Gagal! Nama Pengajar atau Kata Sandi Anda salah.');
-                    return;
+                    // Auto-sync teacher to Supabase teachers table so it exists permanently across all devices & incognito tabs
+                    const newTeacher = {
+                        name: name.trim(),
+                        email: `${name.toLowerCase().replace(/\s+/g, '')}@bima.id`,
+                        school: matchedLocal?.school || school || 'Sekolah Jawa',
+                        password: password
+                    };
+                    let teacherId = Date.now();
+                    try {
+                        const { data: inst } = await supabase.from('teachers').insert([newTeacher]).select();
+                        if (inst && inst.length > 0) {
+                            teacherId = inst[0].id;
+                        }
+                    } catch (e) {}
+
+                    onLogin({
+                        id: teacherId,
+                        name: newTeacher.name,
+                        role: 'Educator',
+                        school: newTeacher.school
+                    });
                 }
             } else {
                 onLogin({

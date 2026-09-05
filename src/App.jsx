@@ -233,15 +233,13 @@ export default function App() {
           if (teacherClasses.length > 0) {
             setClasses(teacherClasses);
           } else {
-            const generateRandomToken = () => {
-              const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-              let result = '';
-              for (let i = 0; i < 6; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-              }
-              return `BIMA-${result}`;
+            const getDeterministicToken = (tName) => {
+              if (tName === 'Ki Hadjar') return 'BIMA-SMP9A';
+              const clean = tName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+              const slug = clean.length >= 6 ? clean.substring(0, 6) : (clean + 'X1Y2Z3').substring(0, 6);
+              return `BIMA-${slug}`;
             };
-            const starterToken = generateRandomToken();
+            const starterToken = getDeterministicToken(teacherName);
             const starterClassObj = {
               title: `Kelas Basa Jawa (${teacherName})`,
               level: 'SMP',
@@ -361,7 +359,8 @@ export default function App() {
           ...(classes || []).map(c => c.token),
           user?.token,
           'BIMA-SMP9A',
-          'BIMA-EWGRZ4'
+          'BIMA-EWGRZ4',
+          'BIMA-PRABUP'
         ].filter(Boolean)));
 
         for (const tok of tokensToEnsure) {
