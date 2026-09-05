@@ -386,8 +386,12 @@ export default function StudentPwa({
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        messages: promptMessages,
-                        max_tokens: 500
+                        characterId: activeRoleplayChar?.id || 'mbok-bakul',
+                        messages: updatedMessages.map(m => ({
+                            role: m.sender === 'student' ? 'student' : 'assistant',
+                            content: m.text
+                        })),
+                        max_tokens: 600
                     })
                 });
 
