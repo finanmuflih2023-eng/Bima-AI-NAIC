@@ -1,5 +1,49 @@
 import { JAVANESE_KNOWLEDGE_BASE } from './knowledge.js';
 
+// Helper: Evaluasi kata demi kata pesan siswa untuk deteksi kata Ngoko / Salah Kaprah Krama Inggil
+function evaluateStudentMessageWords(text) {
+  if (!text || typeof text !== 'string') return [];
+
+  const rawWords = text.trim().split(/\s+/);
+  const { ngokoToKramaDictionary, selfInggilMisuse } = JAVANESE_KNOWLEDGE_BASE;
+
+  let isPreviousWordKula = false;
+
+  return rawWords.map((w) => {
+    const cleanWord = w.toLowerCase().replace(/[^a-z=]/g, '');
+    let isCorrect = true;
+    let correction = null;
+    let reason = null;
+
+    // 1. Cek Ngoko / Typo Dictionary
+    if (ngokoToKramaDictionary[cleanWord]) {
+      isCorrect = false;
+      correction = ngokoToKramaDictionary[cleanWord].krama;
+      reason = ngokoToKramaDictionary[cleanWord].reason;
+    } 
+    // 2. Cek Salah Kaprah Krama Inggil untuk Diri Sendiri (misal: kula badhe tindak / kula badhe dhahar)
+    else if (selfInggilMisuse[cleanWord] && (isPreviousWordKula || text.toLowerCase().includes('kula') || text.toLowerCase().includes('kulo'))) {
+      isCorrect = false;
+      correction = selfInggilMisuse[cleanWord].correct;
+      reason = selfInggilMisuse[cleanWord].reason;
+    }
+
+    if (cleanWord === 'kula' || cleanWord === 'kulo') {
+      isPreviousWordKula = true;
+    } else {
+      isPreviousWordKula = false;
+    }
+
+    return {
+      word: w,
+      cleanWord,
+      isCorrect,
+      correction,
+      reason
+    };
+  });
+}
+
 export default async function handler(req, res) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -20,28 +64,37 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages = [], characterId = 'mbok-bakul', max_tokens = 600, temperature = 0.7 } = req.body;
+    const { messages = [], characterId = 'mbok-bakul', max_tokens = 600, temperature = 0.85 } = req.body;
 
     const charConfig = JAVANESE_KNOWLEDGE_BASE.characterContexts[characterId] || JAVANESE_KNOWLEDGE_BASE.characterContexts['mbok-bakul'];
 
-    // 1. STAGE 1 & 2: RAG Context & Knowledge Injection
+    // Ambil pesan terakhir siswa
+    const lastStudentMsgObj = [...messages].reverse().find(m => m.role === 'student' || m.sender === 'student');
+    const lastStudentText = lastStudentMsgObj ? (lastStudentMsgObj.content || lastStudentMsgObj.text || '') : '';
+
+    // Lakukan evaluasi kata demi kata untuk penandaan teks merah
+    const evaluatedWords = evaluateStudentMessageWords(lastStudentText);
+
+    // RAG Prompt dengan Variasi Bahasa Tinggi (Temperature 0.85)
     const ragPrompt = `Anda adalah Engine AI Orchestrator Pembelajaran Basa Jawa Sosiokultural BIMA AI.
-Peran Anda: ${charConfig.persona}
+Persona Karakter: ${charConfig.persona}
 Ragam Basa: ${charConfig.level}
 Nada Bicara: ${charConfig.tone}
+Instruksi Variasi Balasan: ${charConfig.variationsInstruction}
 
 ATURAN RAG UNGGAH-UNGGUH:
+- Gunakan bahasa Jawa Krama yang SANGAT BERVARIASI, hidup, kreatif, ramah, dan alami. Jangan mengulang-ulang kalimat template yang sama.
 - Krama Inggil kagem tiyang sanes (umpama: tindak, dhahar, paring, mundhut, kondur).
 - Kanggo awake dhewe (siswa) nggunakake Krama Lugu/Madyo (umpama: kesah, nedha, nyuwun, tumbas, mantuk).
 
 TUGAS ANDA:
-1. Pahami niat/intent percakapan siswa secara kontekstual (bukan sekadar keyword matching).
-2. Balas ucapan siswa sebagai ${charConfig.persona} dalam Basa Jawa Krama yang alami, fleksibel, dan relevan (1-3 kalimat).
+1. Pahami niat/intent percakapan siswa secara kontekstual dan spesifik.
+2. Balas ucapan siswa sebagai ${charConfig.persona} dalam Basa Jawa Krama yang alami, ekspresif, dan bervariasi (1-3 kalimat). Berikan detail nyata (umpama sebutkan harga, jenis barang seger, tawaran bumbu, saran menu, utawi donga pangestu).
 3. Berikan evaluasi ringkas etika/unggah-ungguh siswa.
 
 Format JSON Wajib:
 {
-  "reply": "Teks balasan Basa Jawa Krama...",
+  "reply": "Teks balasan Basa Jawa Krama bervariasi...",
   "intent": "nama_intent",
   "speech_level": "${charConfig.level}",
   "feedback": "Evaluasi ringkas unggah-ungguh Basa Jawa siswa"
@@ -74,7 +127,7 @@ Format JSON Wajib:
           body: JSON.stringify({
             model: modelId,
             messages: promptMessages,
-            temperature: temperature,
+            temperature: 0.85,
             max_tokens: max_tokens
           })
         });
@@ -87,7 +140,6 @@ Format JSON Wajib:
             let feedbackText = null;
             let detectedIntent = 'dialogue';
 
-            // Extract JSON response if returned
             try {
               const cleanJsonStr = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
               const parsed = JSON.parse(cleanJsonStr);
@@ -97,11 +149,12 @@ Format JSON Wajib:
                 detectedIntent = parsed.intent || 'dialogue';
               }
             } catch (e) {
-              // Raw text response fallback
+              // Raw text fallback
             }
 
             return res.status(200).json({ 
               reply: replyText,
+              evaluatedWords: evaluatedWords,
               feedback: feedbackText,
               intent: detectedIntent,
               speechLevel: charConfig.level,
@@ -117,7 +170,11 @@ Format JSON Wajib:
       }
     }
 
-    return res.status(500).json({ error: 'All Groq models failed', detail: lastError });
+    return res.status(500).json({ 
+      error: 'All Groq models failed', 
+      evaluatedWords: evaluatedWords, 
+      detail: lastError 
+    });
 
   } catch (error) {
     return res.status(500).json({ error: error.message });

@@ -400,6 +400,13 @@ export default function StudentPwa({
                     if (apiData.reply && apiData.reply.trim()) {
                         replyText = apiData.reply.trim();
                     }
+                    if (apiData.evaluatedWords) {
+                        setRoleplayMessages(prev => prev.map((m, idx) => 
+                            (m.sender === 'student' && idx === prev.length - 1) 
+                                ? { ...m, evaluatedWords: apiData.evaluatedWords, feedback: apiData.feedback } 
+                                : m
+                        ));
+                    }
                 }
             } catch (proxyErr) {
                 console.warn("Vercel Serverless /api/chat failed, attempting direct Groq API fetch:", proxyErr);
@@ -706,7 +713,37 @@ export default function StudentPwa({
                                             ? 'bg-[#3E2723] text-white rounded-tr-none' 
                                             : 'bg-white text-gray-800 border border-gray-150 rounded-tl-none'
                                     }`}>
-                                        <p>{msg.text}</p>
+                                        {msg.sender === 'student' && msg.evaluatedWords && msg.evaluatedWords.length > 0 ? (
+                                            <div className="flex flex-wrap gap-1 items-center">
+                                                {msg.evaluatedWords.map((w, wIdx) => (
+                                                    w.isCorrect ? (
+                                                        <span key={wIdx}>{w.word}</span>
+                                                    ) : (
+                                                        <span 
+                                                            key={wIdx} 
+                                                            className="bg-red-500 text-white px-1.5 py-0.5 rounded font-black underline cursor-pointer relative group/tooltip"
+                                                        >
+                                                            {w.word}
+                                                            <span className="hidden group-hover/tooltip:block absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-52 bg-red-950 text-white text-[10px] p-2.5 rounded-xl shadow-lg z-50 pointer-events-none text-left font-normal border border-red-400">
+                                                                <strong className="block text-red-300 font-bold mb-0.5">⚠️ Evaluasi Unggah-Ungguh:</strong>
+                                                                <span className="block text-amber-200">Bener: <em>"{w.correction}"</em></span>
+                                                                <span className="block text-gray-200 mt-1 text-[9px] leading-tight">{w.reason}</span>
+                                                            </span>
+                                                        </span>
+                                                    )
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p>{msg.text}</p>
+                                        )}
+
+                                        {/* Educational Feedback Hint */}
+                                        {msg.sender === 'student' && msg.feedback && (
+                                            <div className="mt-2 text-[10px] text-amber-200 bg-black/25 p-2 rounded-xl text-left border border-white/10 font-normal">
+                                                💡 <strong>Catatan Unggah-Ungguh:</strong> {msg.feedback}
+                                            </div>
+                                        )}
+
                                         {msg.sender !== 'student' && (
                                             <button 
                                                 type="button"
