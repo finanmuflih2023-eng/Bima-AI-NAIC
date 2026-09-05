@@ -503,6 +503,25 @@ export default function App() {
     alert('Siswa berhasil dikeluarkan dari daftar kelas!');
   };
 
+  const handleLeaveClass = async (studentObj, token) => {
+    const cleanToken = token.trim().toUpperCase();
+    try {
+      await supabase
+        .from('class_enrollments')
+        .delete()
+        .eq('class_token', cleanToken)
+        .or(`student_username.eq.${studentObj.username || studentObj.name},student_name.eq.${studentObj.name}`);
+    } catch (e) {
+      console.warn("Supabase leave class error");
+    }
+
+    const updated = enrollments.filter(e => 
+      !(e.class_token === cleanToken && (e.student_username === (studentObj.username || studentObj.name) || e.student_name === studentObj.name))
+    );
+    setEnrollments(updated);
+    localStorage.setItem('bima_enrollments', JSON.stringify(updated));
+  };
+
   // --- 10. CLASSROOM ANNOUNCEMENTS & COMMENTS HANDLERS ---
   const handlePostAnnouncement = async (classToken, content) => {
     const newAnn = {
@@ -601,6 +620,7 @@ export default function App() {
         announcements={announcements}
         comments={comments}
         onJoinClass={handleJoinClass}
+        onLeaveClass={handleLeaveClass}
         onPostComment={handlePostComment}
       />
     );

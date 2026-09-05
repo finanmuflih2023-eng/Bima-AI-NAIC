@@ -18,6 +18,7 @@ export default function StudentPwa({
     announcements = [],
     comments = [],
     onJoinClass,
+    onLeaveClass,
     onPostComment
 }) {
     const [activeTab, setActiveTab] = useState('tasks'); // 'tasks' | 'stream' | 'history' | 'sandbox' | 'profile'
@@ -836,6 +837,23 @@ export default function StudentPwa({
                                         className="text-[10px] bg-amber-100 hover:bg-amber-200 text-amber-950 px-2.5 py-0.5 rounded-lg font-black border border-amber-300 transition cursor-pointer flex items-center gap-1"
                                     >
                                         <Users size={12} /> {classMembers.length} Teman Sekelas
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            if (window.confirm(`Apakah Anda yakin ingin keluar dari kelas ${currentClassObj?.title || activeClassToken}?`)) {
+                                                if (onLeaveClass) onLeaveClass(user, activeClassToken);
+                                                alert('Anda telah keluar dari kelas.');
+                                                const newToken = prompt('Masukkan Token Kelas Baru dari Gurumu untuk bergabung ke kelas baru:');
+                                                if (newToken && newToken.trim()) {
+                                                    const cleanT = newToken.trim().toUpperCase();
+                                                    setActiveClassToken(cleanT);
+                                                    if (onJoinClass) onJoinClass(user, cleanT);
+                                                }
+                                            }
+                                        }}
+                                        className="text-[10px] bg-red-50 hover:bg-red-100 text-red-700 font-bold px-2.5 py-0.5 rounded-lg border border-red-200 transition cursor-pointer flex items-center gap-1"
+                                    >
+                                        <LogOut size={11} /> Keluar Kelas
                                     </button>
                                 </div>
                             </div>

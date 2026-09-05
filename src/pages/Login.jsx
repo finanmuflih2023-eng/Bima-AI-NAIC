@@ -437,13 +437,16 @@ export default function Login({ onLogin, onStudentLogin, classes }) {
 
                             <div className="flex flex-col gap-1.5">
                                 <div className="flex justify-between items-center">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Token Kelas Guru (Opsional/Bisa Diisi Nanti)</label>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
+                                        {isStudentLoginTab ? 'Token Kelas (Opsional - Otomatis Menggunakan Kelas Terdaftar)' : 'Token Kelas Guru (Wajib)'}
+                                    </label>
                                     <span className="text-[9px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded">BIMA-SMP9A</span>
                                 </div>
                                 <div className="relative">
                                     <KeyRound size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-455" />
                                     <input
                                         type="text"
+                                        required={!isStudentLoginTab}
                                         placeholder="BIMA-XXXXXX"
                                         value={classToken}
                                         onChange={(e) => setClassToken(e.target.value)}
