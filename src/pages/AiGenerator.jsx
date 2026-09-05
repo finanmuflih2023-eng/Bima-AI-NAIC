@@ -90,7 +90,6 @@ export default function AiGenerator({
 
         const prompt = `Buat ${count} soal evaluasi lisan bahasa Jawa dengan ragam ${kramaType}, konteks sosiokultural ${contextSituation}. Gunakan kompetensi yang diekstrak: ${extractedKeywords.filter(k => selectedKeywords.includes(k.id)).map(k => k.word).join(', ')}`;
 
-        try {
         const systemPrompt = `Anda adalah Asisten Generator Soal Lisan Basa Jawa Sosiokultural Kurikulum Merdeka.
 Tugas Anda adalah menghasilkan daftar soal/skenario evaluasi lisan Basa Jawa format JSON persis tanpa markdown/codeblock berlebih.
 

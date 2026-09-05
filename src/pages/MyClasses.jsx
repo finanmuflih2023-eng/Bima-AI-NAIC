@@ -19,44 +19,6 @@ export default function MyClasses({
     if (activeClass) {
         // Cari tugas lisan yang aktif dirilis ke token kelas ini
         const activeTasks = tasks.filter(t => t.classToken === activeClass.token);
-
-        return (
-            <div className="p-8 text-left font-sans text-gray-800 antialiased w-full">
-                {/* Tombol Navigasi Kembali */}
-                <button
-                    onClick={() => setSelectedClassId(null)}
-                    className="text-xxs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-1 hover:text-amber-800 transition cursor-pointer"
-                >
-                    <ArrowLeft size={12} /> Kembali ke semua kelas
-                </button>
-
-                {/* Header Manajemen Kelas */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl border border-gray-200 shadow-xs gap-4 w-full">
-                    <div>
-                        <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">
-                            {activeClass.level} • {activeClass.school_type}
-                        </span>
-                        <h1 className="text-2xl font-black text-gray-900 mt-2 tracking-tight">{activeClass.title}</h1>
-                        <p className="text-xs text-gray-400 font-medium mt-1">
-                            {activeClass.school_name} • Token Akses: <span className="font-mono font-black text-amber-900 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">{activeClass.token}</span>
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={() => {
-                            if (confirm(`Apakah Anda yakin ingin menghapus kelas "${activeClass.title}"?`)) {
-                                onDeleteClass(activeClass.id);
-                                setSelectedClassId(null);
-                            }
-                        }}
-                        className="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2.5 rounded-xl text-xs active:scale-95 transition-all duration-200 shadow-2xs cursor-pointer flex items-center gap-2"
-                    >
-                        <Trash2 size={14} />
-                        Hapus Kelas
-                    </button>
-                </div>
-
-        // Filter enrollments, announcements, & submissions for active class token
         const classEnrollments = (enrollments || []).filter(e => e.class_token === activeClass.token);
         const classAnnouncements = (announcements || []).filter(a => a.class_token === activeClass.token);
         const classSubmissions = (submissions || []).filter(s => s.classToken === activeClass.token);
