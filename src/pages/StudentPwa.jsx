@@ -592,12 +592,30 @@ export default function StudentPwa({
                 </div>
 
                 {/* Bottom utilities */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2 border-t border-amber-900/60 pt-4">
+                    <p className="text-[9px] uppercase font-bold text-amber-400/80 px-2 tracking-wider">Bantuan & Dokumentasi</p>
+                    <a
+                        href="/DOKUMENTASI/panduan.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-white/5 hover:bg-white/10 text-amber-200/80 hover:text-white py-2 rounded-xl text-xs font-semibold flex items-center gap-2 px-3 transition"
+                    >
+                        <span>📖</span>
+                        <span>Panduan Pengguna</span>
+                    </a>
+                    <a
+                        href="/DOKUMENTASI/index.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-white/5 hover:bg-white/10 text-amber-200/80 hover:text-white py-2 rounded-xl text-xs font-semibold flex items-center gap-2 px-3 transition"
+                    >
+                        <span>📄</span>
+                        <span>Dokumentasi Proyek</span>
+                    </a>
 
-                    
                     <button
                         onClick={onLogout}
-                        className="w-full bg-white/5 text-amber-250/70 hover:bg-red-950/30 hover:text-red-300 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition border border-white/5"
+                        className="w-full bg-white/5 text-amber-250/70 hover:bg-red-950/30 hover:text-red-300 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition border border-white/5 mt-2"
                     >
                         <LogOut size={14} />
                         Keluar Portal

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, BookOpen, Cpu, BarChart3, Settings, LogOut, Menu, AlertTriangle, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Cpu, BarChart3, Settings, LogOut, Menu, AlertTriangle, RefreshCw, HelpCircle, FileText } from 'lucide-react';
 
 // 1. Tangkap 'handleLogout' di parameter props paling atas
 // PASTIKAN 'setIsSidebarOpen' ADA DI DALAM KURUNG KURAWAL PROPS INI:
@@ -13,6 +13,11 @@ export default function Sidebar({ isSidebarOpen: isOpen, setIsSidebarOpen, curre
         { id: 'ai-generator', name: 'AI Generator', icon: Cpu },
         { id: 'analytics', name: 'Analytics', icon: BarChart3 },
         { id: 'settings', name: 'Settings', icon: Settings },
+    ];
+
+    const externalLinks = [
+        { id: 'panduan', name: 'Panduan Pengguna', icon: HelpCircle, href: '/DOKUMENTASI/panduan.html' },
+        { id: 'documentation', name: 'Dokumentasi Proyek', icon: FileText, href: '/DOKUMENTASI/index.html' },
     ];
 
     return (
@@ -43,8 +48,8 @@ export default function Sidebar({ isSidebarOpen: isOpen, setIsSidebarOpen, curre
                         </button>
                     </div>
 
-                    {/* Menu Navigasi */}
-                    <nav className="flex flex-col gap-1.5 w-full">
+                    {/* Menu Navigasi Utama */}
+                    <nav className="flex flex-col gap-1.5 w-full mb-6">
                         {menus.map((menu) => {
                             const Icon = menu.icon;
                             const isMenuAllignedActive = currentTab === menu.id;
@@ -53,17 +58,7 @@ export default function Sidebar({ isSidebarOpen: isOpen, setIsSidebarOpen, curre
                                 <button
                                     key={menu.id}
                                     type="button"
-                                    onClick={() => {
-                                        if (
-                                            menu.id === 'dashboard' ||
-                                            menu.id === 'classes' ||
-                                            menu.id === 'ai-generator' ||
-                                            menu.id === 'analytics' ||
-                                            menu.id === 'settings'
-                                        ) {
-                                            setCurrentTab(menu.id);
-                                        }
-                                    }}
+                                    onClick={() => setCurrentTab(menu.id)}
                                     className={`flex items-center rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer ${isOpen ? 'px-4 py-3 gap-3' : 'p-3 justify-center'
                                         } ${isMenuAllignedActive
                                             ? 'bg-amber-700 text-white shadow-sm'
@@ -79,6 +74,32 @@ export default function Sidebar({ isSidebarOpen: isOpen, setIsSidebarOpen, curre
                             );
                         })}
                     </nav>
+
+                    {/* Pembatas Navigasi Panduan & Dokumentasi */}
+                    <div className="w-full border-t border-amber-900/60 pt-4 mb-2">
+                        {isOpen && <p className="text-[10px] uppercase font-bold text-amber-400/80 px-4 mb-2 tracking-wider">Pusat Bantuan</p>}
+                        <div className="flex flex-col gap-1.5 w-full">
+                            {externalLinks.map((link) => {
+                                const Icon = link.icon;
+                                return (
+                                    <a
+                                        key={link.id}
+                                        href={link.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`flex items-center rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap cursor-pointer text-amber-200/80 hover:bg-white/10 hover:text-white ${
+                                            isOpen ? 'px-4 py-2.5 gap-3' : 'p-3 justify-center'
+                                        }`}
+                                    >
+                                        <Icon size={16} strokeWidth={2} className="shrink-0 text-amber-400" />
+                                        <span className={`transition-all duration-300 ${isOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 pointer-events-none overflow-hidden'}`}>
+                                            {link.name}
+                                        </span>
+                                    </a>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
 
 

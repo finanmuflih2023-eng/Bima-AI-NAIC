@@ -487,10 +487,28 @@ export default function Login({ onLogin, onStudentLogin, classes, defaultUserTyp
                                 className="w-full bg-amber-750 hover:bg-[#2D1B18] text-white font-black py-3 rounded-xl text-xs transition uppercase tracking-wider shadow-md cursor-pointer mt-2"
                             >
                                 {isStudentLoginTab ? 'Masuk Portal Belajar Siswa' : 'Daftar & Masuk Portal Siswa'}
-                            </button>
                         </form>
                     </div>
                 )}
+
+                {/* Footer Links Panduan, Dokumentasi, GitHub & Video Demo */}
+                <div className="mt-8 pt-4 border-t border-amber-900/10 flex flex-wrap justify-center items-center gap-4 text-xs font-semibold text-amber-900/75">
+                    <a href="/DOKUMENTASI/panduan.html" target="_blank" rel="noopener noreferrer" className="hover:text-amber-700 underline flex items-center gap-1 transition">
+                        📖 Panduan Pengguna
+                    </a>
+                    <span className="text-gray-300">•</span>
+                    <a href="/DOKUMENTASI/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-amber-700 underline flex items-center gap-1 transition">
+                        📄 Dokumentasi Proyek
+                    </a>
+                    <span className="text-gray-300">•</span>
+                    <a href="https://unyku.id/BIMA-GitHub-Repo" target="_blank" rel="noopener noreferrer" className="hover:text-amber-700 underline flex items-center gap-1 transition">
+                        💻 GitHub
+                    </a>
+                    <span className="text-gray-300">•</span>
+                    <a href="https://unyku.id/BIMA-Video-Demo" target="_blank" rel="noopener noreferrer" className="hover:text-amber-700 underline flex items-center gap-1 transition">
+                        🎬 Video Demo
+                    </a>
+                </div>
 
             </div>
         </div>

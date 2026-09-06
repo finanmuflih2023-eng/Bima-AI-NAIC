@@ -40,6 +40,15 @@ export default function App() {
   
   const [currentTab, setCurrentTab] = useState(() => {
     const pathTab = window.location.pathname.replace('/', '').toLowerCase();
+    if (pathTab === 'panduan' || pathTab === 'guide') {
+      window.location.href = '/DOKUMENTASI/panduan.html';
+      return 'dashboard';
+    }
+    if (pathTab === 'documentation' || pathTab === 'docs' || pathTab === 'dokumentasi') {
+      window.location.href = '/DOKUMENTASI/index.html';
+      return 'dashboard';
+    }
+
     const validTabs = ['dashboard', 'classes', 'ai-generator', 'analytics', 'settings'];
     if (validTabs.includes(pathTab)) return pathTab;
 

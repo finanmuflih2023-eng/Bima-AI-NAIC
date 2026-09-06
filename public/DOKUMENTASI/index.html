@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dokumentasi Proyek BIMA — NAIC 2026 Hackathon Sprint MVP</title>
+  <meta name="description" content="Dokumentasi Resmi Proyek BIMA (Bisa Basa Krama) untuk Submission Hackathon Sprint BISA AI National AI Agent Challenge 2026.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="brand-container">
+      <img src="images/logo BIMA.png" alt="Logo BIMA" class="brand-logo" onerror="this.src='images/Logo lengkap.png'">
+      <div class="brand-meta">
+        <h2>BIMA AI AGENT</h2>
+        <span>NAIC 2026 Hackathon Sprint MVP</span>
+      </div>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="#ringkasan" class="nav-link">Ringkasan</a></li>
+      <li><a href="#multi-agent" class="nav-link">Arsitektur Multi-Agent</a></li>
+      <li><a href="#fitur" class="nav-link">Fitur MVP</a></li>
+      <li><a href="#teknis" class="nav-link">Teknologi</a></li>
+      <li><a href="#quickstart" class="nav-link">Cara Menjalankan</a></li>
+      <li><a href="#video-demo" class="nav-link">Video Demo</a></li>
+      <li><a href="panduan.html" class="nav-link" style="color: var(--primary); font-weight: 700;">📖 Panduan Pengguna</a></li>
+    </ul>
+
+    <div class="nav-cta-group">
+      <a href="https://unyku.id/BIMA-Live-Prototype" target="_blank" class="btn-primary">
+        <span>🚀</span> Live Prototype
+      </a>
+      <a href="https://unyku.id/BIMA-GitHub-Repo" target="_blank" class="btn-outline">
+        <span>💻</span> GitHub
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-container">
+      <div class="badge-competition">
+        <span>🏆</span> BISA AI National AI Agent Challenge (NAIC) 2026 — Tahap 2: Hackathon Sprint
+      </div>
+      <h1 class="hero-title">BIMA (Bisa Basa Krama)</h1>
+      <p class="hero-subtitle">
+        Autonomous Multi-Agent System for Javanese Krama Learning, Adaptive Pronunciation Evaluation, and Pedagogical Intelligence
+      </p>
+
+      <div class="hero-ctas">
+        <a href="https://unyku.id/BIMA-Live-Prototype" target="_blank" class="btn-primary">
+          <span>🌐</span> Akses Live Prototype (MVP)
+        </a>
+        <a href="https://unyku.id/BIMA-GitHub-Repo" target="_blank" class="btn-outline">
+          <span>📦</span> Repository GitHub
+        </a>
+        <a href="https://unyku.id/BIMA-Video-Demo" target="_blank" class="btn-outline">
+          <span>🎬</span> Video Demo
+        </a>
+        <a href="panduan.html" class="btn-outline" style="border-color: var(--primary); color: var(--primary);">
+          <span>📖</span> Panduan Pengguna
+        </a>
+      </div>
+
+      <div class="quick-meta-grid">
+        <div class="meta-card">
+          <span>Sektor Solusi</span>
+          <strong>Education</strong>
+        </div>
+        <div class="meta-card">
+          <span>Kategori Lomba</span>
+          <strong>Pelajar & Mahasiswa</strong>
+        </div>
+        <div class="meta-card">
+          <span>Institusi Pengembang</span>
+          <strong>Universitas Negeri Yogyakarta</strong>
+        </div>
+        <div class="meta-card">
+          <span>Status Tahap</span>
+          <strong>MVP Hackathon Selesai ✓</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="layout-container">
+
+    <!-- 1. RINGKASAN & PROBLEM STATEMENT -->
+    <section id="ringkasan" class="content-section">
+      <div class="section-header">
+        <span class="section-tag">Bagian 1</span>
+        <h2>Ringkasan Proyek & Problem Statement</h2>
+      </div>
+
+      <p style="margin-bottom: 20px; font-size: 1.05rem;">
+        <strong>BIMA (Bisa Basa Krama)</strong> adalah ekosistem kecerdasan buatan otonom berbasis <em>Autonomous Multi-Agent System</em> yang dirancang untuk memecahkan krisis generasi penutur Bahasa Jawa Krama di kalangan remaja SMA/SMK/MA serta mengeliminasi beban administrasi evaluasi lisan guru dalam Kurikulum Merdeka.
+      </p>
+
+      <div class="diagram-container">
+        <img src="images/infografis_urgensi_latar_belakang.jpg" alt="Infografis Urgensi dan Masalah Utama BIMA" class="diagram-img">
+        <div class="diagram-caption">Gambar 1.1: Pemetaan Dua Masalah Utama: Speaking Anxiety Remaja SMA dan Beban Evaluasi Manual Guru</div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 24px;">
+        <div class="card-box">
+          <span class="card-icon">⚠️</span>
+          <h3>Masalah 1: Speaking Anxiety Siswa SMA</h3>
+          <p>
+            Siswa merasa cemas dan takut mencoba berbicara Bahasa Jawa Krama karena takut melakukan kesalahan tingkatan bahasa (<em>undha-usuk</em>) di hadapan guru atau orang tua. Ketiadaan media latihan mandiri membuat siswa semakin pasif.
+          </p>
+        </div>
+        <div class="card-box">
+          <span class="card-icon">⏱️</span>
+          <h3>Masalah 2: Beban Evaluasi Lisan Guru (80%)</h3>
+          <p>
+            Guru Bahasa Jawa membutuhkan waktu berjam-jam mendengarkan puluhan rekaman suara tugas lisan siswa satu per satu, serta kesulitan menyusun skenario soal kontekstual sesuai Capaian Pembelajaran (CP/ATP) Kurikulum Merdeka.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ARSITEKTUR MULTI-AGENT -->
+    <section id="multi-agent" class="content-section">
+      <div class="section-header">
+        <span class="section-tag">Bagian 2</span>
+        <h2>Arsitektur BIMA Multi-Agent Ecosystem</h2>
+      </div>
+
+      <p style="margin-bottom: 20px;">
+        BIMA bukan sekadar LMS biasa atau chatbot wrapper. BIMA digerakkan oleh <strong>tiga agen AI otonom</strong> yang saling berkoordinasi melalui orchestrator <em>LangGraph</em>:
+      </p>
+
+      <div class="diagram-container">
+        <img src="images/bima_multiagent_workflow.jpg" alt="Arsitektur Multi-Agent BIMA" class="diagram-img">
+        <div class="diagram-caption">Gambar 2.1: Jaringan 3 Agen AI Otonom BIMA Terintegrasi dengan Vector RAG Unggah-Ungguh</div>
+      </div>
+
+      <div class="grid-3" style="margin-top: 28px;">
+        <div class="card-box">
+          <span class="badge-tag">GURU ASISTEN</span>
+          <h3>🤖 Agent 1: Pedagogical Assessment Agent</h3>
+          <p>
+            Membaca dan mengekstrak dokumen silabus CP/ATP Kurikulum Merdeka secara otomatis. Agen ini merancang draf soal lisan berbasis skenario sosiokultural (misal: izin sakit ke wali kelas, tawar-menawar di pasar) serta rubrik penilaian Krama secara mandiri.
+          </p>
+        </div>
+
+        <div class="card-box">
+          <span class="badge-tag">SISWA MITRA</span>
+          <h3>🎙️ Agent 2: Adaptive Pronunciation Agent</h3>
+          <p>
+            Menemani latihan percakapan siswa via Progressive Web App (PWA). Didukung oleh <strong>Whisper AI</strong> untuk speech-to-text akurasi tinggi dan menyajikan <em>Instant Visual Corrective Feedback (3 Detik)</em> dengan tanda warna hijau/merah dan pemutar suara penutur asli.
+          </p>
+        </div>
+
+        <div class="card-box">
+          <span class="badge-tag">ANALITIK KELAS</span>
+          <h3>📊 Agent 3: Diagnostic Remedial Agent</h3>
+          <p>
+            Menganalisis hasil latihan siswa sekelas secara kolektif tanpa perlu guru menyimak rekaman manual. Agen mendeteksi pola kelemahan umum (misal 78% salah pada konsonan hembus <em>/th/</em>) dan menghasilkan rekomendasi modul remedial bagi guru.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SIMULASI INTERAKTIF & ALUR KERJA -->
+    <section id="fitur" class="content-section">
+      <div class="section-header">
+        <span class="section-tag">Bagian 3</span>
+        <h2>Alur Kerja Sistem & Simulasi Interaktif</h2>
+      </div>
+
+      <div class="diagram-container">
+        <img src="images/diagram_alur_kerja_aplikasi.jpg" alt="Diagram Alur Kerja Aplikasi BIMA" class="diagram-img">
+        <div class="diagram-caption">Gambar 3.1: Alur Kerja 3 Tahap: Input Phase, Multi-Agent AI Processing, dan Output Phase</div>
+      </div>
+
+      <!-- Interactive Widget Simulator -->
+      <div class="simulator-box">
+        <div class="simulator-header">
+          <div>
+            <h3 style="color: white; font-size: 1.25rem;">🎮 Live Simulator: Instant Visual Corrective Feedback</h3>
+            <span style="font-size: 0.8rem; color: #94A3B8;">Uji coba alur deteksi ucapan Bahasa Jawa Krama seperti pada Mobile PWA Siswa</span>
+          </div>
+          <span class="badge-tag" style="background: #0284C7; color: white;">Interactive Demo</span>
+        </div>
+
+        <div class="simulator-screen">
+          <p style="color: #94A3B8; font-size: 0.88rem; margin-bottom: 12px;">
+            <strong>Skenario Ujian:</strong> Menyampaikan rasa terima kasih dan permohonan maaf kepada Guru.
+          </p>
+          
+          <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; border-left: 3px solid #00A3FF; margin-bottom: 16px;">
+            <span style="font-size: 0.8rem; color: #38BDF8; display: block;">Target Ucapan Krama Inggil:</span>
+            <p style="font-size: 1.05rem; color: #F1F5F9; margin-top: 4px;">
+              <em>"Matur nuwun, Pak, kula nyuwun pangapunten menawi wonten kalepatan."</em>
+            </p>
+          </div>
+
+          <div id="sim-waveform" style="display: none; padding: 14px; text-align: center; background: rgba(2,132,199,0.1); border-radius: 8px; margin-bottom: 14px;">
+            <div style="font-size: 1.2rem; color: #38BDF8; letter-spacing: 4px;"> ▂▃▅▆▇▆▅▃▂ ▂▃▅▆▇▆▅▃▂ </div>
+            <span style="font-size: 0.78rem; color: #7DD3FC;">Streaming Audio ke Whisper AI STT Pipeline...</span>
+          </div>
+
+          <button id="sim-mic-btn" class="mic-btn-test">
+            <span>🎙️</span> Mulai Tes Simulasi Pelafalan Lisan
+          </button>
+          <span id="sim-status" style="display: block; font-size: 0.82rem; color: #94A3B8; margin-top: 8px;">Klik tombol untuk mendemonstrasikan evaluasi suara.</span>
+
+          <!-- Hasil Demo -->
+          <div id="sim-result" style="display: none; margin-top: 18px; padding: 16px; background: rgba(15,23,42,0.8); border-radius: 8px; border: 1px solid #334155;">
+            <span style="font-size: 0.8rem; color: #94A3B8; display: block; margin-bottom: 6px;">Hasil Transkripsi & Deteksi Kesalahan Fonetik:</span>
+            <div style="font-size: 1.15rem; line-height: 1.8;">
+              <span class="feedback-tag-green">Matur</span> 
+              <span class="feedback-tag-green">nuwun,</span> 
+              <span class="feedback-tag-green">Pak,</span> 
+              <span id="interactive-red-word" class="feedback-tag-red" title="Klik untuk penjelasan perbaikan">kulo ⚠️</span> 
+              <span class="feedback-tag-green">nyuwun</span> 
+              <span class="feedback-tag-green">pangapunten</span> 
+              <span class="feedback-tag-green">menawi</span> 
+              <span class="feedback-tag-green">wonten</span> 
+              <span class="feedback-tag-green">kalepatan.</span>
+            </div>
+
+            <div id="sim-correction-box" style="display: none; margin-top: 14px; padding: 12px; background: rgba(220,38,38,0.15); border-left: 3px solid #EF4444; border-radius: 6px;">
+              <strong style="color: #F87171; font-size: 0.88rem;">💡 Koreksi Mandiri Diksi:</strong>
+              <p style="font-size: 0.85rem; color: #E2E8F0; margin-top: 4px;">
+                Kata <span style="text-decoration: line-through; color: #FCA5A5;">"kulo"</span> kurang tepat untuk ragam Krama Inggil resmi. Bentuk baku yang benar adalah <strong>"kula"</strong> (konsonan vokal terbuka).
+              </p>
+              <button style="background: #2563EB; color: white; border: none; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; cursor: pointer; margin-top: 6px;">
+                🔊 Putar Pelafalan Penutur Asli
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. SPESIFIKASI TEKNIS & TECH STACK -->
+    <section id="teknis" class="content-section">
+      <div class="section-header">
+        <span class="section-tag">Bagian 4</span>
+        <h2>Spesifikasi Teknis & Arsitektur Teknologi</h2>
+      </div>
+
+      <div class="diagram-container">
+        <img src="images/bima_system_architecture.jpg" alt="Arsitektur Sistem BIMA 4 Layer" class="diagram-img">
+        <div class="diagram-caption">Gambar 4.1: Diagram Arsitektur 4-Layer: Frontend, Orchestration, AI Services, & Knowledge RAG</div>
+      </div>
+
+      <div style="overflow-x: auto; margin-top: 24px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.92rem;">
+          <thead>
+            <tr style="background: var(--primary); color: white; text-align: left;">
+              <th style="padding: 12px 16px;">Komponen Layer</th>
+              <th style="padding: 12px 16px;">Teknologi Terpasang</th>
+              <th style="padding: 12px 16px;">Peran & Keunggulan pada MVP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--border-color); background: white;">
+              <td style="padding: 12px 16px; font-weight: 600;">Multi-Agent Orchestrator</td>
+              <td style="padding: 12px 16px;"><code>LangGraph / CrewAI</code></td>
+              <td style="padding: 12px 16px;">Mengatur state machine, alur percakapan multi-turn, dan koordinasi antar agen AI secara independen.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-color); background: #F8FAFC;">
+              <td style="padding: 12px 16px; font-weight: 600;">LLM Core Reasoning</td>
+              <td style="padding: 12px 16px;"><code>Llama 3 (8B/70B) via Ollama</code></td>
+              <td style="padding: 12px 16px;">Ekstraksi kurikulum CP/ATP, pembuatan soal skenario sosial, serta evaluasi undha-usuk bahasa.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-color); background: white;">
+              <td style="padding: 12px 16px; font-weight: 600;">Speech Recognition (STT)</td>
+              <td style="padding: 12px 16px;"><code>OpenAI Whisper AI</code></td>
+              <td style="padding: 12px 16px;">Transkripsi suara siswa dengan ketahanan terhadap background noise dan variasi aksen lokal Jawa.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-color); background: #F8FAFC;">
+              <td style="padding: 12px 16px; font-weight: 600;">Vector Knowledge (RAG)</td>
+              <td style="padding: 12px 16px;"><code>ChromaDB Vector Store</code></td>
+              <td style="padding: 12px 16px;">Menyimpan ribuan lema kamus Krama Inggil dan etika sosiolinguistik agar LLM terbebas dari halusinasi.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-color); background: white;">
+              <td style="padding: 12px 16px; font-weight: 600;">Backend Server</td>
+              <td style="padding: 12px 16px;"><code>Python FastAPI & Node.js</code></td>
+              <td style="padding: 12px 16px;">Menyediakan endpoint asinkron latensi rendah (< 3 detik) untuk stream audio dan eksekusi model AI.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-color); background: #F8FAFC;">
+              <td style="padding: 12px 16px; font-weight: 600;">Frontend Mobile (Siswa)</td>
+              <td style="padding: 12px 16px;"><code>Progressive Web App (PWA)</code></td>
+              <td style="padding: 12px 16px;">Bisa di-install langsung tanpa PlayStore/AppStore, ringan, kompatibel di Android dan iOS.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-color); background: white;">
+              <td style="padding: 12px 16px; font-weight: 600;">Frontend Portal (Guru)</td>
+              <td style="padding: 12px 16px;"><code>React / Vite + Tailwind CSS</code></td>
+              <td style="padding: 12px 16px;">Dashboard analitik kelas real-time, manajemen dokumen CP/ATP, dan kontrol ujian lisan.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 5. QUICKSTART & PANDUAN MENJALANKAN -->
+    <section id="quickstart" class="content-section">
+      <div class="section-header">
+        <span class="section-tag">Bagian 5</span>
+        <h2>Panduan Menjalankan Sistem (Installation & Setup Guide)</h2>
+      </div>
+
+      <p style="margin-bottom: 16px;">
+        Berikut adalah panduan bagi panitia dan dewan juri NAIC 2026 untuk mengkloning dan menjalankan source code sistem BIMA secara lokal:
+      </p>
+
+      <h3>1. Prasyarat Sistem (Prerequisites)</h3>
+      <ul style="padding-left: 20px; margin-bottom: 20px;">
+        <li>Python 3.10 atau lebih baru</li>
+        <li>Node.js 18+ & npm</li>
+        <li>Ollama terpasang di sistem (<code>https://ollama.com</code>)</li>
+        <li>FFmpeg (untuk decoding audio format WebM/WAV)</li>
+      </ul>
+
+      <h3>2. Clone Repository & Setup Backend Engine</h3>
+      <div class="code-block-wrapper">
+        <div class="code-header">
+          <span>BASH - BACKEND & AI PIPELINE</span>
+          <button class="btn-copy" data-code="code-backend">Salin Kode</button>
+        </div>
+        <pre><code id="code-backend"># 1. Clone source code dari GitHub
+git clone https://github.com/tim-karna-allah/bima-ai-agent.git
+cd bima-ai-agent
+
+# 2. Masuk ke direktori backend dan buat virtual environment
+cd backend
+python -m venv venv
+
+# Aktivasi virtual environment:
+# Linux/macOS:
+source venv/bin/activate
+# Windows:
+venv\Scripts\activate
+
+# 3. Install dependency AI & FastAPI
+pip install -r requirements.txt
+
+# 4. Unduh model Llama 3 pada Ollama
+ollama run llama3
+
+# 5. Jalankan server backend AI Agent
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
+      </div>
+
+      <h3>3. Setup Frontend Web Portal & Siswa PWA</h3>
+      <div class="code-block-wrapper">
+        <div class="code-header">
+          <span>BASH - FRONTEND CLIENT</span>
+          <button class="btn-copy" data-code="code-frontend">Salin Kode</button>
+        </div>
+        <pre><code id="code-frontend"># Buka terminal baru dan masuk ke direktori frontend
+cd bima-ai-agent/frontend
+
+# Install dependencies Node
+npm install
+
+# Jalankan server frontend Vite
+npm run dev
+
+# Aplikasi kini aktif di:
+# - Portal Guru:  http://localhost:5173/teacher
+# - PWA Siswa:    http://localhost:5173/learn
+# - API Swagger:  http://localhost:8000/docs</code></pre>
+      </div>
+
+      <div class="card-box" style="margin-top: 18px; border-left: 4px solid var(--primary-light);">
+        <strong style="color: var(--primary);">Catatan Akses Pengujian Penguji/Juri:</strong>
+        <p style="font-size: 0.9rem; margin-top: 4px;">
+          Bagi panitia atau dewan juri yang ingin menguji prototipe tanpa instalasi lokal, silakan langsung menggunakan link pengujian berbasis web di: 
+          <a href="https://unyku.id/BIMA-Live-Prototype" target="_blank" style="font-weight: 700;">https://unyku.id/BIMA-Live-Prototype</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- 6. VIDEO DEMO SHOWCASE -->
+    <section id="video-demo" class="content-section">
+      <div class="section-header">
+        <span class="section-tag">Bagian 6</span>
+        <h2>Video Demonstrasi Prototype (Maks. 5 Menit)</h2>
+      </div>
+
+      <p style="margin-bottom: 20px;">
+        Video demo berikut memperlihatkan cara kerja terintegrasi ketiga agen AI BIMA secara langsung:
+      </p>
+
+      <div style="background: #0F172A; border-radius: var(--radius); padding: 40px 20px; text-align: center; color: white; margin-bottom: 24px;">
+        <div style="font-size: 3rem; margin-bottom: 12px;">🎬</div>
+        <h3 style="color: white; font-size: 1.4rem; margin-bottom: 8px;">Video Demo MVP BIMA — NAIC 2026</h3>
+        <p style="color: #94A3B8; max-width: 600px; margin: 0 auto 20px;">
+          Video demonstrasi interaktif berdurasi &plusmn; 4 menit 40 detik menampilkan flow input CP/ATP guru, speech recognition siswa, evaluasi Whisper AI, dan dashboard analitik.
+        </p>
+        <a href="https://unyku.id/BIMA-Video-Demo" target="_blank" class="btn-primary" style="font-size: 1rem; padding: 12px 28px;">
+          <span>▶️</span> Tonton Video Demo di YouTube Unlisted
+        </a>
+      </div>
+
+      <h3>Agenda Breakdown Video Demo (Durasi: 4 Menit 45 Detik)</h3>
+      <div class="grid-2" style="margin-top: 14px;">
+        <div class="card-box">
+          <span style="font-weight: 700; color: var(--primary);">0:00 – 0:45 | Masalah & Urgensi</span>
+          <p style="font-size: 0.88rem; margin-top: 4px;">Paparan speaking anxiety siswa dan beban koreksi rekaman audio guru di sekolah.</p>
+        </div>
+        <div class="card-box">
+          <span style="font-weight: 700; color: var(--primary);">0:45 – 2:00 | Demo Portal Guru (Agent 1)</span>
+          <p style="font-size: 0.88rem; margin-top: 4px;">Unggah dokumen CP/ATP, parsing dokumen otomatis, dan generasi draf soal skenario lisan.</p>
+        </div>
+        <div class="card-box">
+          <span style="font-weight: 700; color: var(--primary);">2:00 – 3:30 | Demo Mobile PWA Siswa (Agent 2)</span>
+          <p style="font-size: 0.88rem; margin-top: 4px;">Latihan pelafalan suara, Whisper STT, serta Instant Feedback penanda kata hijau dan merah.</p>
+        </div>
+        <div class="card-box">
+          <span style="font-weight: 700; color: var(--primary);">3:30 – 4:45 | Class Analytics & Closing (Agent 3)</span>
+          <p style="font-size: 0.88rem; margin-top: 4px;">Dashboard agregasi kesalahan fonem klasikal sekelas dan rekomendasi materi remedial guru.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. PROFIL TIM PENGEMBANG -->
+    <section id="tim" class="content-section">
+      <div class="section-header">
+        <span class="section-tag">Bagian 7</span>
+        <h2>Tim Pengembang (Tim Karna Allah — UNY)</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="card-box">
+          <h3 style="color: var(--primary);">Jihan Khasna Ul Afiifah</h3>
+          <span style="font-size: 0.82rem; color: var(--text-muted); display: block;">Ketua Tim Pelaksana | NIM: 23050530017</span>
+          <p style="font-size: 0.88rem; margin-top: 8px;">
+            Fokus: Perancangan Arsitektur Multi-Agent, Prompt Engineering CP/ATP Kurikulum Merdeka, dan Manajemen Proyek.
+          </p>
+        </div>
+
+        <div class="card-box">
+          <h3 style="color: var(--primary);">Finan Muflih Ismail</h3>
+          <span style="font-size: 0.82rem; color: var(--text-muted); display: block;">Anggota Tim | NIM: 23050630009</span>
+          <p style="font-size: 0.88rem; margin-top: 8px;">
+            Fokus: Implementasi Speech AI (Whisper STT Pipeline), Integrasi Model Ollama/Llama 3, dan Backend FastAPI.
+          </p>
+        </div>
+
+        <div class="card-box">
+          <h3 style="color: var(--primary);">Farid Cahyadi</h3>
+          <span style="font-size: 0.82rem; color: var(--text-muted); display: block;">Anggota Tim | NIM: 23020230033</span>
+          <p style="font-size: 0.88rem; margin-top: 8px;">
+            Fokus: Pengembangan Frontend Progressive Web App (PWA) Mobile Siswa dan Web Dashboard Guru.
+          </p>
+        </div>
+
+        <div class="card-box">
+          <h3 style="color: var(--primary);">Nuryanti</h3>
+          <span style="font-size: 0.82rem; color: var(--text-muted); display: block;">Anggota Tim | NIM: 23010130028</span>
+          <p style="font-size: 0.88rem; margin-top: 8px;">
+            Fokus: Penyusunan Corpus Unggah-Ungguh Basa Jawa, Kamus Krama Inggil Vector Store, dan Validasi Instrumen Bahasa.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      &copy; 2026 <strong>BIMA (Bisa Basa Krama)</strong> — Dikembangkan oleh Tim Karna Allah, Universitas Negeri Yogyakarta (UNY).
+    </p>
+    <p style="margin-top: 6px; font-size: 0.8rem;">
+      Disusun khusus untuk BISA AI National AI Agent Challenge (NAIC) 2026.
+    </p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

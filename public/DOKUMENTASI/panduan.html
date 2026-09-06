@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Pengguna — BIMA - Bisa Basa Krama | User Guide & Interactive Demo</title>
+    <meta name="description" content="Buku Panduan Pengguna Interaktif dan Demo Platform BIMA (Bisa Basa Krama) - Smart LMS & AI Javanese Pronunciation Evaluator untuk Siswa SMA.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Reset & Variable */
+        :root {
+            --primary: #2E75B6;
+            --primary-dark: #1F4E79;
+            --primary-light: #E2EAF4;
+            --accent: #8B5A2B;
+            --accent-light: #F4E8C1;
+            --bg-cream: #FAF6EE;
+            --text-dark: #2C3E50;
+            --text-light: #7F8C8D;
+            --white: #FFFFFF;
+            --green: #2ECC71;
+            --red: #E74C3C;
+            --border-radius: 16px;
+            --shadow: 0 10px 30px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header / Navbar */
+        header {
+            background-color: rgba(250, 246, 238, 0.85);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(46, 117, 182, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            transition: var(--transition);
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
+
+        .brand-logos {
+            display: flex;
+            align-items: center;
+        }
+
+        .brand-logos img {
+            height: 52px;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+
+        .brand-logos img:hover {
+            transform: scale(1.03);
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 15px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-cta {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 10px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(46, 117, 182, 0.3);
+        }
+
+        .btn-cta:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(31, 78, 121, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding-top: 160px;
+            padding-bottom: 80px;
+            background: linear-gradient(135deg, rgba(226, 234, 244, 0.4) 0%, rgba(244, 232, 193, 0.3) 100%);
+            position: relative;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .hero-tag {
+            display: inline-block;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 1px solid rgba(46, 117, 182, 0.2);
+        }
+
+        .hero-title {
+            font-size: 46px;
+            line-height: 1.2;
+            color: var(--primary-dark);
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        }
+
+        .hero-title span {
+            color: var(--accent);
+        }
+
+        .hero-desc {
+            font-size: 16px;
+            color: var(--text-dark);
+            opacity: 0.85;
+            margin-bottom: 36px;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-dark);
+            border: 2px solid var(--primary-dark);
+            padding: 12px 28px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .hero-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-card-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transition: var(--transition);
+        }
+
+        .hero-card-img:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Features Quick Grid */
+        .quick-features {
+            padding: 60px 0;
+            background-color: var(--white);
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 48px auto;
+        }
+
+        .section-header h2 {
+            font-size: 32px;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 15px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background-color: var(--bg-cream);
+            border: 1px solid rgba(46, 117, 182, 0.08);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+            border-color: rgba(46, 117, 182, 0.2);
+            background-color: var(--white);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--primary-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 18px;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* Interactive Tabs Section */
+        .guide-section {
+            padding: 80px 0;
+            background-color: var(--bg-cream);
+        }
+
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+
+        .tab-btn {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(46, 117, 182, 0.15);
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            background-color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(46, 117, 182, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 48px;
+            align-items: start;
+        }
+
+        .guide-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .step-item {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            border-left: 4px solid var(--primary);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .step-item:hover {
+            transform: translateX(4px);
+        }
+
+        .step-num {
+            display: inline-block;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 700;
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .step-item h4 {
+            font-size: 16px;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+
+        .step-item p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* Screenshot Gallery Showcase CSS */
+        .screenshot-showcase {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(46, 117, 182, 0.05);
+            position: sticky;
+            top: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .ss-nav {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--primary-light);
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .ss-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .ss-btn {
+            background-color: var(--bg-cream);
+            border: 1px solid rgba(46, 117, 182, 0.1);
+            color: var(--text-dark);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+
+        .ss-btn:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .ss-btn.active {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            border-color: var(--primary-dark);
+        }
+
+        .ss-display {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .ss-img-container {
+            width: 100%;
+            background-color: var(--bg-cream);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .ss-img {
+            max-width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+
+        .ss-img:hover {
+            transform: scale(1.02);
+        }
+
+        .ss-desc {
+            font-size: 13px;
+            color: var(--text-light);
+            text-align: center;
+            min-height: 40px;
+            line-height: 1.4;
+        }
+
+        /* Demo Sandbox Section */
+        .demo-section {
+            padding: 80px 0;
+            background-color: var(--white);
+        }
+
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+        }
+
+        .demo-card {
+            background-color: var(--bg-cream);
+            border-radius: var(--border-radius);
+            padding: 36px;
+            border: 1px solid rgba(46, 117, 182, 0.08);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .demo-card h3 {
+            font-size: 22px;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .demo-card p.demo-intro {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+
+        /* Sandbox 1: Speech Evaluation */
+        .sandbox-eval {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .scenario-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+        }
+
+        .scenario-box span {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            text-transform: uppercase;
+        }
+
+        .scenario-box p {
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .mic-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .btn-mic {
+            width: 72px;
+            height: 72px;
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            box-shadow: 0 8px 25px rgba(46, 117, 182, 0.4);
+            position: relative;
+        }
+
+        .btn-mic:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .btn-mic.recording {
+            background-color: var(--red);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+
+        .mic-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--primary-light);
+            border-radius: 3px;
+            overflow: hidden;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0;
+            transition: width 2s linear;
+        }
+
+        .feedback-output {
+            margin-top: 24px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .feedback-output h5 {
+            font-size: 13px;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .feedback-text-box {
+            background-color: #FAFAFA;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #EAEAEA;
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .word-correct {
+            color: var(--green);
+            font-weight: 600;
+            border-bottom: 2px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .word-wrong {
+            color: var(--red);
+            font-weight: 600;
+            border-bottom: 2px solid rgba(231, 76, 60, 0.3);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .word-wrong::after {
+            content: '🔊';
+            font-size: 10px;
+            margin-left: 2px;
+            vertical-align: super;
+        }
+
+        .tooltip-card {
+            background-color: var(--accent-light);
+            border-left: 3px solid var(--accent);
+            padding: 10px 12px;
+            border-radius: 0 6px 6px 0;
+            font-size: 12px;
+            color: #5C3A21;
+            margin-top: 8px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Sandbox 2: Chat-based Roleplay */
+        .chat-mockup {
+            background-color: var(--white);
+            border-radius: 16px;
+            border: 6px solid #2C3E50;
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .chat-header {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .chat-user-info h4 {
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .chat-user-info span {
+            font-size: 10px;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-user-info span::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: var(--green);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .chat-body {
+            flex-grow: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background-color: #EFEAE2;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-msg {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .chat-msg.bot {
+            background-color: var(--white);
+            color: var(--text-dark);
+            align-self: flex-start;
+            border-top-left-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .chat-msg.user {
+            background-color: #DCF8C6;
+            color: var(--text-dark);
+            align-self: flex-end;
+            border-top-right-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .chat-typing {
+            align-self: flex-start;
+            background-color: var(--white);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border-top-left-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--text-light);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        .chat-options {
+            padding: 12px;
+            background-color: var(--white);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chat-btn-opt {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            border: 1px solid rgba(46, 117, 182, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .chat-btn-opt:hover {
+            background-color: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            padding: 48px 0;
+            margin-top: 80px;
+            border-top: 4px solid var(--accent);
+        }
+
+        .footer-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 24px;
+            margin-bottom: 24px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer-logo img {
+            height: 44px;
+            background-color: var(--white);
+            border-radius: 6px;
+            padding: 4px;
+        }
+
+        .footer-text {
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .hero-grid, .guide-grid, .demo-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding-top: 120px;
+                padding-bottom: 40px;
+            }
+
+            .navbar {
+                flex-direction: column;
+                height: auto;
+                padding: 16px 0;
+                gap: 16px;
+            }
+
+            .nav-menu {
+                gap: 16px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header>
+        <div class="container navbar">
+            <div class="brand-logos">
+                <img src="images/Logo lengkap.png" alt="Logo BIMA">
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">📄 Dokumentasi</a></li>
+                <li><a href="#beranda" class="nav-link">Beranda</a></li>
+                <li><a href="#fitur" class="nav-link">Fitur Utama</a></li>
+                <li><a href="#panduan" class="nav-link">Panduan</a></li>
+                <li><a href="#demo" class="nav-link">Demo Interaktif</a></li>
+                <li><a href="https://unyku.id/BIMA-GitHub-Repo" target="_blank" class="nav-link">💻 GitHub</a></li>
+                <li><a href="https://unyku.id/BIMA-Video-Demo" target="_blank" class="nav-link">🎬 Video</a></li>
+                <li><a href="/" class="btn-cta">🚀 Launch App</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="beranda">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <span class="hero-tag">Inovasi Pembelajaran Digital SMA</span>
+                <h1 class="hero-title">Revitalisasi Bahasa Krama Inggil bersama <span>BIMA</span></h1>
+                <p class="hero-desc">
+                    Ekosistem Smart LMS berbasis Progressive Web App (PWA) yang memadukan teknologi Artificial Intelligence (AI) Whisper untuk melatih keterampilan bertutur kata santun Javanese Krama bagi remaja SMA secara objektif, interaktif, dan tanpa rasa cemas.
+                </p>
+                <div class="hero-btns">
+                    <a href="#panduan" class="btn-cta" style="padding: 14px 32px; font-size: 15px;">Mulai Panduan</a>
+                    <a href="https://unyku.id/bima_siswa" target="_blank" class="btn-secondary" style="border-color: var(--primary); color: var(--primary);">Mulai Belajar</a>
+                </div>
+            </div>
+            <div class="hero-card">
+                <!-- Tampilan Logo BIMA besar di depan dashboard -->
+                <img src="images/logo BIMA.png" alt="Logo Utama BIMA" class="hero-card-img" style="max-height: 280px; width: auto;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Features -->
+    <section class="quick-features" id="fitur">
+        <div class="container">
+            <div class="section-header">
+                <h2>Teknologi Cerdas untuk Warisan Budaya</h2>
+                <p>Mengintegrasikan asisten pembelajaran otomatis bagi guru dan laboratorium latihan lisan interaktif bagi siswa SMA.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>Automated Question Generator</h3>
+                    <p>Mesin pembuat soal cerdas berbasis GPT-4o untuk membuat skenario tes lisan sosiokultural secara cepat dan hemat waktu bagi guru.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎙️</div>
+                    <h3>Whisper Speech Evaluation</h3>
+                    <p>Teknologi Speech Recognition NLP ter-fine-tuning untuk menilai pelafalan kata, unggah-ungguh (kesantunan), dan kelancaran berbicara.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>AI Chat Roleplay Simulator</h3>
+                    <p>Wahana simulasi percakapan chat interaktif bebas kecemasan untuk melatih tata krama sosial siswa SMA secara riil dan adaptif.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Guides (Tabs) -->
+    <section class="guide-section" id="panduan">
+        <div class="container">
+            <div class="section-header">
+                <h2>Buku Panduan Pengguna BIMA</h2>
+                <p>Pilih gerbang panduan operasional sistem BIMA sesuai dengan peran penggunaan Anda di sekolah.</p>
+            </div>
+            
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('guru')">Panduan Guru (Web Dashboard)</button>
+                <button class="tab-btn" onclick="switchTab('siswa')">Panduan Siswa SMA (Mobile PWA)</button>
+            </div>
+
+            <!-- Tab 1: Guru -->
+            <div class="tab-content active" id="tab-guru">
+                <div class="guide-grid">
+                    <div class="guide-steps">
+                        <div class="step-item">
+                            <span class="step-num">Langkah 1</span>
+                            <h4>Registrasi & Buat Kelas Digital</h4>
+                            <p>Masuk ke portal Guru, isi nama kelas, mata pelajaran, dan dapatkan <strong>Kode Kelas</strong> unik untuk dibagikan kepada siswa SMA Anda.</p>
+                        </div>
+                        <div class="step-item">
+                            <span class="step-num">Langkah 2</span>
+                            <h4>Analisis Kurikulum Instan</h4>
+                            <p>Unggah file CP (Capaian Pembelajaran) atau ATP Kurikulum Merdeka pada modul <strong>AI Curriculum Input</strong> untuk ekstraksi materi otomatis.</p>
+                        </div>
+                        <div class="step-item">
+                            <span class="step-num">Langkah 3</span>
+                            <h4>Generate Soal Lisan Otomatis</h4>
+                            <p>Gunakan generator AI untuk membuat soal ujian lisan berdasarkan skenario sosiokultural, lalu terbitkan langsung ke kelas.</p>
+                        </div>
+                        <div class="step-item">
+                            <span class="step-num">Langkah 4</span>
+                            <h4>Pantau Dasbor Analitik Kelas</h4>
+                            <p>Lihat grafik performa, ketahui kosakata tersulit kelas secara klasikal, dan dapatkan rekomendasi intervensi luring presisi dari AI.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Screenshot Showcase for Teacher -->
+                    <div class="screenshot-showcase">
+                        <div class="ss-nav">
+                            <button class="ss-btn active" onclick="switchScreenshot('guru', 'login')">Login</button>
+                            <button class="ss-btn" onclick="switchScreenshot('guru', 'dashboard')">Dashboard</button>
+                            <button class="ss-btn" onclick="switchScreenshot('guru', 'generator')">AI Generator</button>
+                            <button class="ss-btn" onclick="switchScreenshot('guru', 'analytics')">Analytics</button>
+                            <button class="ss-btn" onclick="switchScreenshot('guru', 'settings')">Settings</button>
+                        </div>
+                        <div class="ss-display">
+                            <div class="ss-img-container">
+                                <img id="ss-img-guru" src="images/login guru.jpg" alt="Login Guru" class="ss-img">
+                            </div>
+                            <p id="ss-desc-guru" class="ss-desc">Antarmuka masuk (Login) guru BIMA untuk keamanan akses data kelas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Siswa -->
+            <div class="tab-content" id="tab-siswa">
+                <div class="guide-grid">
+                    <div class="guide-steps">
+                        <div class="step-item">
+                            <span class="step-num">Langkah 1</span>
+                            <h4>Instalasi PWA Ringan</h4>
+                            <p>Buka browser di HP, klik "Tambahkan ke Layar Utama" (Chrome/Safari). Aplikasi terpasang tanpa memakan ruang memori HP.</p>
+                        </div>
+                        <div class="step-item">
+                            <span class="step-num">Langkah 2</span>
+                            <h4>Jawab Skenario Secara Lisan</h4>
+                            <p>Masuk kelas dengan kode guru, baca skenario percakapan sosial, tekan tombol mikrofon, lalu ucapkan jawaban Krama Anda.</p>
+                        </div>
+                        <div class="step-item">
+                            <span class="step-num">Langkah 3</span>
+                            <h4>Evaluasi & Umpan Balik Instan</h4>
+                            <p>Seketika teks transkripsi muncul. Kata yang salah berwarna merah, ketuk kata merah untuk mendengar pembenaran native speaker.</p>
+                        </div>
+                        <div class="step-item">
+                            <span class="step-num">Langkah 4</span>
+                            <h4>AI Chat-based Sandbox Roleplay</h4>
+                            <p>Latih kesantunan mengetik Anda melalui fitur obrolan teks/chat interaktif bebas cemas dengan AI pedagang atau guru untuk mengumpulkan XP.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Screenshot Showcase for Student -->
+                    <div class="screenshot-showcase">
+                        <div class="ss-nav">
+                            <button class="ss-btn active" onclick="switchScreenshot('siswa', 'login')">Login</button>
+                            <button class="ss-btn" onclick="switchScreenshot('siswa', 'dashboard')">Dashboard</button>
+                            <button class="ss-btn" onclick="switchScreenshot('siswa', 'history')">Riwayat</button>
+                            <button class="ss-btn" onclick="switchScreenshot('siswa', 'achievements')">Pencapaian</button>
+                            <button class="ss-btn" onclick="switchScreenshot('siswa', 'sandbox')">AI Chat Sandbox</button>
+                        </div>
+                        <div class="ss-display">
+                            <div class="ss-img-container">
+                                <img id="ss-img-siswa" src="images/login siswa.jpg" alt="Login Siswa" class="ss-img">
+                            </div>
+                            <p id="ss-desc-siswa" class="ss-desc">Antarmuka masuk (Login) siswa SMA dengan memasukkan NISN dan kode kelas dari guru.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Interactive Sandbox -->
+    <section class="demo-section" id="demo">
+        <div class="container">
+            <div class="section-header">
+                <h2>Coba Demo Interaktif Fitur AI BIMA</h2>
+                <p>Simulasikan cara kerja teknologi inti BIMA secara langsung di bawah ini.</p>
+            </div>
+            
+            <div class="demo-container">
+                <!-- Sandbox 1: Speech Evaluation -->
+                <div class="demo-card">
+                    <h3><span>🎙️</span> AI Speech Evaluation</h3>
+                    <p class="demo-intro">Tekan tombol mikrofon untuk mensimulasikan pelafalan lisan dari skenario sosiokultural yang diberikan.</p>
+                    
+                    <div class="sandbox-eval">
+                        <div class="scenario-box">
+                            <span>Skenario Soal Siswa:</span>
+                            <p>"Tanggapi sapaan Bapak Guru saat berpapasan di lorong kelas: 'Sugeng enjang, priye kabare?'"</p>
+                        </div>
+                        
+                        <div class="mic-area">
+                            <button class="btn-mic" id="btn-mic-demo" onclick="simulateRecording()">🎙️</button>
+                            <span class="mic-label" id="mic-label-demo">Klik Mikrofon untuk Menjawab</span>
+                            
+                            <div class="progress-bar" id="progress-bar-demo">
+                                <div class="progress-bar-fill" id="progress-fill-demo"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="feedback-output" id="feedback-output-demo">
+                            <h5>Umpan Balik AI:</h5>
+                            <div class="feedback-text-box">
+                                <span class="word-correct">Sugeng</span> 
+                                <span class="word-correct">enjang</span> 
+                                <span class="word-correct">Bapak.</span> 
+                                <span class="word-correct">Kabar</span> 
+                                <span class="word-correct">kula</span> 
+                                <span class="word-wrong" onclick="toggleTooltip()">dumateng</span> 
+                                <span class="word-correct">sae.</span>
+                            </div>
+                            <div class="tooltip-card" id="tooltip-demo">
+                                <strong>Salah Pilihan Kata (Kesalahan Unggah-Ungguh):</strong><br>
+                                Kata kerja yang Anda ucapkan adalah <em>'dumateng'</em>. Seharusnya gunakan kata <strong>'sae'</strong> atau <strong>'pangestunipun'</strong> untuk mengekspresikan kabar baik kepada orang tua/guru.<br>
+                                <button onclick="playAudioMock()" style="margin-top: 8px; padding: 4px 8px; background-color: var(--accent); color: var(--white); border: none; border-radius: 4px; font-size: 10px; cursor: pointer;">🔊 Dengar Pelafalan Benar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sandbox 2: Chat-based Roleplay -->
+                <div class="demo-card">
+                    <h3><span>💬</span> AI Chat-Based Roleplay</h3>
+                    <p class="demo-intro">Pilih kalimat chat yang tepat untuk menjawab sapaan pedagang pasar tradisional dalam Krama Madya/Alus.</p>
+                    
+                    <div class="chat-mockup">
+                        <div class="chat-header">
+                            <div class="chat-avatar">Mb</div>
+                            <div class="chat-user-info">
+                                <h4>Mbah Bakul Sinom</h4>
+                                <span>Online</span>
+                            </div>
+                        </div>
+                        <div class="chat-body" id="chat-body-demo">
+                            <div class="chat-msg bot">
+                                "Monggo Nak, bade mundut jamu sinom nopo beras kencur? Regine namung tigang ewu."
+                            </div>
+                            <div class="chat-typing" id="chat-typing-demo">
+                                <div class="typing-dots">
+                                    <div class="typing-dot"></div>
+                                    <div class="typing-dot"></div>
+                                    <div class="typing-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-options" id="chat-opts-demo">
+                            <button class="chat-btn-opt" onclick="sendChat('Kula tumbas sinom setunggal nggih, Mbah. Niki artone.', 'Matur nuwun, Nak. Niki jamune dipundut nggih.')">"Kula tumbas sinom setunggal nggih, Mbah. Niki artone."</button>
+                            <button class="chat-btn-opt" onclick="sendChat('Aku arep tuku sinom siji Mbah, piro hargane?', 'Nyuwun sewu Nak, dhumateng tiyang sepuh prayoginipun ngginakaken ragam krama.')">"Aku arep tuku sinom siji Mbah, piro hargane?" (Kasap/Ngoko)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-grid">
+            <div class="footer-logo">
+                <img src="images/logo BIMA.png" alt="Logo Footer BIMA">
+                <h3 style="color: var(--white)">BIMA (Bisa Basa Krama)</h3>
+            </div>
+            <div class="footer-text">
+                &copy; 2026 Tim BIMA - Universitas Negeri Yogyakarta. Lomba Inovasi Digital Mahasiswa (LIDM). All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS Logic -->
+    <script>
+        // Interactive Tab switching
+        function switchTab(role) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (role === 'guru') {
+                event.target.classList.add('active');
+                document.getElementById('tab-guru').classList.add('active');
+            } else {
+                event.target.classList.add('active');
+                document.getElementById('tab-siswa').classList.add('active');
+            }
+        }
+
+        // Sub-Tab Switcher for Screenshots
+        function switchScreenshot(role, screen) {
+            // Get buttons and update active class
+            const nav = event.target.parentElement;
+            nav.querySelectorAll('.ss-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const img = document.getElementById(`ss-img-${role}`);
+            const desc = document.getElementById(`ss-desc-${role}`);
+
+            if (role === 'guru') {
+                switch(screen) {
+                    case 'login':
+                        img.src = './login guru.jpg';
+                        img.alt = 'Login Guru';
+                        desc.innerText = 'Antarmuka masuk (Login) guru BIMA untuk keamanan akses data kelas.';
+                        break;
+                    case 'dashboard':
+                        img.src = './dashboard guru.jpg';
+                        img.alt = 'Dashboard Guru';
+                        desc.innerText = 'Dasbor utama guru untuk mengelola daftar kelas, materi, dan memantau kode kelas.';
+                        break;
+                    case 'generator':
+                        img.src = './ai generator guru.jpg';
+                        img.alt = 'AI Generator Guru';
+                        desc.innerText = 'Fitur pembuatan soal lisan sosiokultural secara otomatis menggunakan AI GPT-4o.';
+                        break;
+                    case 'analytics':
+                        img.src = './analytics guru.jpg';
+                        img.alt = 'Analytics Guru';
+                        desc.innerText = 'Statistik performa kelas klasikal untuk melihat kelemahan fonem pengucapan siswa secara rinci.';
+                        break;
+                    case 'settings':
+                        img.src = './setting guru.jpg';
+                        img.alt = 'Setting Guru';
+                        desc.innerText = 'Halaman pengaturan akun, informasi profil guru, dan preferensi sekolah.';
+                        break;
+                }
+            } else {
+                switch(screen) {
+                    case 'login':
+                        img.src = './login siswa.jpg';
+                        img.alt = 'Login Siswa';
+                        desc.innerText = 'Antarmuka masuk (Login) siswa SMA dengan memasukkan NISN dan kode kelas dari guru.';
+                        break;
+                    case 'dashboard':
+                        img.src = './dashboard siswa.jpg';
+                        img.alt = 'Dashboard Siswa';
+                        desc.innerText = 'Dasbor siswa SMA yang bersih dan estetik, menampilkan daftar tugas lisan yang sedang aktif.';
+                        break;
+                    case 'history':
+                        img.src = './riwayat asesmen siswa.jpg';
+                        img.alt = 'Riwayat Asesmen';
+                        desc.innerText = 'Daftar riwayat pengerjaan tugas lisan beserta perolehan nilai evaluasi yang sudah diselesaikan.';
+                        break;
+                    case 'achievements':
+                        img.src = './pencapaian siswa.jpg';
+                        img.alt = 'Pencapaian Siswa';
+                        desc.innerText = 'Halaman pencapaian (Gamifikasi) yang menunjukkan akumulasi poin pengalaman (XP) dan lencana keterampilan.';
+                        break;
+                    case 'sandbox':
+                        img.src = './ai sandbox siswa (untuk simulasi chat ai).jpg';
+                        img.alt = 'AI Sandbox Chat';
+                        desc.innerText = 'Laboratorium simulasi obrolan chat interaktif bebas cemas dengan AI berkarakter sosial Javanese.';
+                        break;
+                }
+            }
+        }
+
+        // Sandbox 1: Simulate Speech Recording
+        function simulateRecording() {
+            const micBtn = document.getElementById('btn-mic-demo');
+            const micLabel = document.getElementById('mic-label-demo');
+            const progress = document.getElementById('progress-bar-demo');
+            const fill = document.getElementById('progress-fill-demo');
+            const feedback = document.getElementById('feedback-output-demo');
+            const tooltip = document.getElementById('tooltip-demo');
+
+            if (micBtn.classList.contains('recording')) return;
+
+            micBtn.classList.add('recording');
+            micLabel.innerText = 'Perekaman Suara Aktif... Bicara Sekarang!';
+            progress.style.display = 'block';
+            fill.style.width = '100%';
+            feedback.style.display = 'none';
+            tooltip.style.display = 'none';
+
+            // Simulate 3 seconds recording + processing
+            setTimeout(() => {
+                micBtn.classList.remove('recording');
+                micLabel.innerText = 'Pemrosesan Whisper AI Selesai!';
+                progress.style.display = 'none';
+                fill.style.width = '0';
+                feedback.style.display = 'block';
+            }, 3000);
+        }
+
+        // Toggle tooltip for error word
+        function toggleTooltip() {
+            const tooltip = document.getElementById('tooltip-demo');
+            tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Mock play audio
+        function playAudioMock() {
+            alert("🔊 Memutar audio native speaker: 'Sugeng enjang Bapak, kabar kula sae.'");
+        }
+
+        // Sandbox 2: Chat-based Roleplay
+        function sendChat(userMsg, botReply) {
+            const chatBody = document.getElementById('chat-body-demo');
+            const typing = document.getElementById('chat-typing-demo');
+            const opts = document.getElementById('chat-opts-demo');
+
+            // Disable options
+            opts.style.pointerEvents = 'none';
+            opts.style.opacity = '0.5';
+
+            // Append User message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-msg user';
+            userDiv.innerText = userMsg;
+            chatBody.insertBefore(userDiv, typing);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // Show typing indicator
+            typing.style.display = 'block';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // Simulate reply after 1.5 seconds
+            setTimeout(() => {
+                typing.style.display = 'none';
+                
+                const botDiv = document.createElement('div');
+                botDiv.className = 'chat-msg bot';
+                botDiv.innerText = botReply;
+                chatBody.insertBefore(botDiv, typing);
+                chatBody.scrollTop = chatBody.scrollHeight;
+
+                // Re-enable options or show end
+                if (userMsg.includes('artone')) {
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = 'chat-msg bot';
+                    statusDiv.style.backgroundColor = '#F4E8C1';
+                    statusDiv.style.alignSelf = 'center';
+                    statusDiv.style.fontWeight = 'bold';
+                    statusDiv.innerText = "🏆 Simulasi Selesai! Anda mendapat +50 XP!";
+                    chatBody.insertBefore(statusDiv, typing);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                } else {
+                    // Reset options for retrying correct krama
+                    opts.style.pointerEvents = 'auto';
+                    opts.style.opacity = '1';
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
