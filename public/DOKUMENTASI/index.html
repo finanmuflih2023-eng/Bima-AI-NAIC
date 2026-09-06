@@ -30,14 +30,17 @@
       <li><a href="#multi-agent" class="nav-link">Arsitektur Multi-Agent</a></li>
       <li><a href="#fitur" class="nav-link">Fitur MVP</a></li>
       <li><a href="#teknis" class="nav-link">Teknologi</a></li>
-      <li><a href="#quickstart" class="nav-link">Cara Menjalankan</a></li>
+      <li><a href="#quickstart" class="nav-link">Akses Live MVP</a></li>
       <li><a href="#video-demo" class="nav-link">Video Demo</a></li>
       <li><a href="panduan.html" class="nav-link" style="color: var(--primary); font-weight: 700;">📖 Panduan Pengguna</a></li>
     </ul>
 
     <div class="nav-cta-group">
-      <a href="https://unyku.id/BIMA-Live-Prototype" target="_blank" class="btn-primary">
-        <span>🚀</span> Live Prototype
+      <a href="https://bima-ai-naic.vercel.app/" target="_blank" class="btn-primary">
+        <span>🚀</span> Live MVP
+      </a>
+      <a href="https://unyku.id/Portofolio-BIMA-Project" target="_blank" class="btn-outline">
+        <span>📂</span> Portofolio
       </a>
       <a href="https://unyku.id/BIMA-GitHub-Repo" target="_blank" class="btn-outline">
         <span>💻</span> GitHub
@@ -57,17 +60,20 @@
       </p>
 
       <div class="hero-ctas">
-        <a href="https://unyku.id/BIMA-Live-Prototype" target="_blank" class="btn-primary">
-          <span>🌐</span> Akses Live Prototype (MVP)
+        <a href="https://bima-ai-naic.vercel.app/" target="_blank" class="btn-primary">
+          <span>🌐</span> Akses Live MVP App
+        </a>
+        <a href="panduan.html" class="btn-outline" style="border-color: var(--primary); color: var(--primary);">
+          <span>📖</span> Panduan Pengguna
+        </a>
+        <a href="https://unyku.id/Portofolio-BIMA-Project" target="_blank" class="btn-outline">
+          <span>📁</span> Portofolio BIMA
         </a>
         <a href="https://unyku.id/BIMA-GitHub-Repo" target="_blank" class="btn-outline">
           <span>📦</span> Repository GitHub
         </a>
         <a href="https://unyku.id/BIMA-Video-Demo" target="_blank" class="btn-outline">
           <span>🎬</span> Video Demo
-        </a>
-        <a href="panduan.html" class="btn-outline" style="border-color: var(--primary); color: var(--primary);">
-          <span>📖</span> Panduan Pengguna
         </a>
       </div>
 
@@ -307,125 +313,66 @@
       </div>
     </section>
 
-    <!-- 5. QUICKSTART & PANDUAN MENJALANKAN -->
+    <!-- 5. AKSES LIVE MVP & PANDUAN PENGGUNA -->
     <section id="quickstart" class="content-section">
       <div class="section-header">
         <span class="section-tag">Bagian 5</span>
-        <h2>Panduan Menjalankan Sistem (Installation & Setup Guide)</h2>
+        <h2>Akses Live MVP & Panduan Pengguna</h2>
       </div>
 
-      <p style="margin-bottom: 16px;">
-        Berikut adalah panduan bagi panitia dan dewan juri NAIC 2026 untuk mengkloning dan menjalankan source code sistem BIMA secara lokal:
+      <p style="margin-bottom: 20px; font-size: 1.05rem;">
+        Platform BIMA (Bisa Basa Krama) telah dideploy secara penuh di cloud dan dapat langsung diuji coba tanpa perlu instalasi lokal:
       </p>
 
-      <h3>1. Prasyarat Sistem (Prerequisites)</h3>
-      <ul style="padding-left: 20px; margin-bottom: 20px;">
-        <li>Python 3.10 atau lebih baru</li>
-        <li>Node.js 18+ & npm</li>
-        <li>Ollama terpasang di sistem (<code>https://ollama.com</code>)</li>
-        <li>FFmpeg (untuk decoding audio format WebM/WAV)</li>
-      </ul>
-
-      <h3>2. Clone Repository & Setup Backend Engine</h3>
-      <div class="code-block-wrapper">
-        <div class="code-header">
-          <span>BASH - BACKEND & AI PIPELINE</span>
-          <button class="btn-copy" data-code="code-backend">Salin Kode</button>
+      <div class="grid-2" style="margin-bottom: 24px;">
+        <div class="card-box" style="border-top: 4px solid var(--primary);">
+          <span class="card-icon">🚀</span>
+          <h3>1. Live MVP Web Application</h3>
+          <p style="margin-bottom: 16px;">
+            Akses langsung aplikasi Smart LMS & AI Pronunciation Evaluator (Portal Guru & Mobile PWA Siswa) yang aktif secara live di Vercel Cloud:
+          </p>
+          <a href="https://bima-ai-naic.vercel.app/" target="_blank" class="btn-primary" style="display: inline-block; width: 100%; text-align: center; text-decoration: none;">
+            🌐 Buka Live MVP (bima-ai-naic.vercel.app)
+          </a>
         </div>
-        <pre><code id="code-backend"># 1. Clone source code dari GitHub
-git clone https://github.com/tim-karna-allah/bima-ai-agent.git
-cd bima-ai-agent
 
-# 2. Masuk ke direktori backend dan buat virtual environment
-cd backend
-python -m venv venv
-
-# Aktivasi virtual environment:
-# Linux/macOS:
-source venv/bin/activate
-# Windows:
-venv\Scripts\activate
-
-# 3. Install dependency AI & FastAPI
-pip install -r requirements.txt
-
-# 4. Unduh model Llama 3 pada Ollama
-ollama run llama3
-
-# 5. Jalankan server backend AI Agent
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
+        <div class="card-box" style="border-top: 4px solid #8B5A2B;">
+          <span class="card-icon">📖</span>
+          <h3>2. Buku Panduan Pengguna Interaktif</h3>
+          <p style="margin-bottom: 16px;">
+            Pelajari alur penggunaan lengkap untuk Guru dan Siswa melalui Buku Panduan Pengguna Interaktif BIMA:
+          </p>
+          <a href="panduan.html" class="btn-primary" style="display: inline-block; width: 100%; text-align: center; text-decoration: none; background: #8B5A2B;">
+            📖 Buka Panduan Pengguna BIMA
+          </a>
+        </div>
       </div>
 
-      <h3>3. Setup Frontend Web Portal & Siswa PWA</h3>
-      <div class="code-block-wrapper">
-        <div class="code-header">
-          <span>BASH - FRONTEND CLIENT</span>
-          <button class="btn-copy" data-code="code-frontend">Salin Kode</button>
-        </div>
-        <pre><code id="code-frontend"># Buka terminal baru dan masuk ke direktori frontend
-cd bima-ai-agent/frontend
-
-# Install dependencies Node
-npm install
-
-# Jalankan server frontend Vite
-npm run dev
-
-# Aplikasi kini aktif di:
-# - Portal Guru:  http://localhost:5173/teacher
-# - PWA Siswa:    http://localhost:5173/learn
-# - API Swagger:  http://localhost:8000/docs</code></pre>
-      </div>
-
-      <div class="card-box" style="margin-top: 18px; border-left: 4px solid var(--primary-light);">
-        <strong style="color: var(--primary);">Catatan Akses Pengujian Penguji/Juri:</strong>
+      <div class="card-box" style="border-left: 4px solid var(--primary-light);">
+        <strong style="color: var(--primary);">📁 Portofolio Proyek BIMA:</strong>
         <p style="font-size: 0.9rem; margin-top: 4px;">
-          Bagi panitia atau dewan juri yang ingin menguji prototipe tanpa instalasi lokal, silakan langsung menggunakan link pengujian berbasis web di: 
-          <a href="https://unyku.id/BIMA-Live-Prototype" target="_blank" style="font-weight: 700;">https://unyku.id/BIMA-Live-Prototype</a>.
+          Untuk melihat berkas portofolio resmi dan penjelasan mendalam mengenai proyek BIMA, silakan kunjungi: 
+          <a href="https://unyku.id/Portofolio-BIMA-Project" target="_blank" style="font-weight: 700; color: var(--primary);">https://unyku.id/Portofolio-BIMA-Project</a>.
         </p>
       </div>
     </section>
 
-    <!-- 6. VIDEO DEMO SHOWCASE -->
+    <!-- 6. VIDEO DEMONSTRASI PROTOTYPE -->
     <section id="video-demo" class="content-section">
       <div class="section-header">
         <span class="section-tag">Bagian 6</span>
-        <h2>Video Demonstrasi Prototype (Maks. 5 Menit)</h2>
+        <h2>Video Demonstrasi Prototype</h2>
       </div>
 
-      <p style="margin-bottom: 20px;">
-        Video demo berikut memperlihatkan cara kerja terintegrasi ketiga agen AI BIMA secara langsung:
-      </p>
-
-      <div style="background: #0F172A; border-radius: var(--radius); padding: 40px 20px; text-align: center; color: white; margin-bottom: 24px;">
-        <div style="font-size: 3rem; margin-bottom: 12px;">🎬</div>
-        <h3 style="color: white; font-size: 1.4rem; margin-bottom: 8px;">Video Demo MVP BIMA — NAIC 2026</h3>
-        <p style="color: #94A3B8; max-width: 600px; margin: 0 auto 20px;">
-          Video demonstrasi interaktif berdurasi &plusmn; 4 menit 40 detik menampilkan flow input CP/ATP guru, speech recognition siswa, evaluasi Whisper AI, dan dashboard analitik.
+      <div style="background: #0F172A; border-radius: var(--radius); padding: 48px 24px; text-align: center; color: white;">
+        <div style="font-size: 3.5rem; margin-bottom: 16px;">🎬</div>
+        <h3 style="color: white; font-size: 1.6rem; margin-bottom: 12px;">Video Demo BIMA AI Agent</h3>
+        <p style="color: #94A3B8; max-width: 550px; margin: 0 auto 24px; font-size: 1.05rem;">
+          Saksikan video demonstrasi pengujian sistem BIMA AI Agent untuk pembelajaran Bahasa Jawa Krama melalui tautan berikut:
         </p>
-        <a href="https://unyku.id/BIMA-Video-Demo" target="_blank" class="btn-primary" style="font-size: 1rem; padding: 12px 28px;">
-          <span>▶️</span> Tonton Video Demo di YouTube Unlisted
+        <a href="https://unyku.id/BIMA-Video-Demo" target="_blank" class="btn-primary" style="font-size: 1.1rem; padding: 14px 32px; display: inline-block;">
+          <span>▶️</span> Video Demo: unyku.id/BIMA-Video-Demo
         </a>
-      </div>
-
-      <h3>Agenda Breakdown Video Demo (Durasi: 4 Menit 45 Detik)</h3>
-      <div class="grid-2" style="margin-top: 14px;">
-        <div class="card-box">
-          <span style="font-weight: 700; color: var(--primary);">0:00 – 0:45 | Masalah & Urgensi</span>
-          <p style="font-size: 0.88rem; margin-top: 4px;">Paparan speaking anxiety siswa dan beban koreksi rekaman audio guru di sekolah.</p>
-        </div>
-        <div class="card-box">
-          <span style="font-weight: 700; color: var(--primary);">0:45 – 2:00 | Demo Portal Guru (Agent 1)</span>
-          <p style="font-size: 0.88rem; margin-top: 4px;">Unggah dokumen CP/ATP, parsing dokumen otomatis, dan generasi draf soal skenario lisan.</p>
-        </div>
-        <div class="card-box">
-          <span style="font-weight: 700; color: var(--primary);">2:00 – 3:30 | Demo Mobile PWA Siswa (Agent 2)</span>
-          <p style="font-size: 0.88rem; margin-top: 4px;">Latihan pelafalan suara, Whisper STT, serta Instant Feedback penanda kata hijau dan merah.</p>
-        </div>
-        <div class="card-box">
-          <span style="font-weight: 700; color: var(--primary);">3:30 – 4:45 | Class Analytics & Closing (Agent 3)</span>
-          <p style="font-size: 0.88rem; margin-top: 4px;">Dashboard agregasi kesalahan fonem klasikal sekelas dan rekomendasi materi remedial guru.</p>
-        </div>
       </div>
     </section>
 
@@ -438,18 +385,18 @@ npm run dev
 
       <div class="grid-2">
         <div class="card-box">
-          <h3 style="color: var(--primary);">Jihan Khasna Ul Afiifah</h3>
-          <span style="font-size: 0.82rem; color: var(--text-muted); display: block;">Ketua Tim Pelaksana | NIM: 23050530017</span>
+          <h3 style="color: var(--primary);">Finan Muflih Ismail</h3>
+          <span style="font-size: 0.82rem; color: var(--text-muted); display: block;">Ketua Tim Pelaksana | NIM: 23050630009</span>
           <p style="font-size: 0.88rem; margin-top: 8px;">
-            Fokus: Perancangan Arsitektur Multi-Agent, Prompt Engineering CP/ATP Kurikulum Merdeka, dan Manajemen Proyek.
+            Fokus: Lead Developer, Perancangan Arsitektur Multi-Agent System, Speech AI (Whisper STT Pipeline), dan Fullstack Integration.
           </p>
         </div>
 
         <div class="card-box">
-          <h3 style="color: var(--primary);">Finan Muflih Ismail</h3>
-          <span style="font-size: 0.82rem; color: var(--text-muted); display: block;">Anggota Tim | NIM: 23050630009</span>
+          <h3 style="color: var(--primary);">Jihan Khasna Ul Afiifah</h3>
+          <span style="font-size: 0.82rem; color: var(--text-muted); display: block;">Anggota Tim | NIM: 23050530017</span>
           <p style="font-size: 0.88rem; margin-top: 8px;">
-            Fokus: Implementasi Speech AI (Whisper STT Pipeline), Integrasi Model Ollama/Llama 3, dan Backend FastAPI.
+            Fokus: Prompt Engineering CP/ATP Kurikulum Merdeka, Analisis Pedagogis, & Manajemen Operasional Lomba.
           </p>
         </div>
 

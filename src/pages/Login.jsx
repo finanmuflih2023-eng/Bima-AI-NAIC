@@ -492,7 +492,7 @@ export default function Login({ onLogin, onStudentLogin, classes, defaultUserTyp
                     </div>
                 )}
 
-                {/* Footer Links Panduan, Dokumentasi, GitHub & Video Demo */}
+                {/* Footer Links Panduan, Dokumentasi, Portofolio, GitHub & Video Demo */}
                 <div className="mt-8 pt-4 border-t border-amber-900/10 flex flex-wrap justify-center items-center gap-4 text-xs font-semibold text-amber-900/75">
                     <a href="/DOKUMENTASI/panduan.html" target="_blank" rel="noopener noreferrer" className="hover:text-amber-700 underline flex items-center gap-1 transition">
                         📖 Panduan Pengguna
@@ -500,6 +500,10 @@ export default function Login({ onLogin, onStudentLogin, classes, defaultUserTyp
                     <span className="text-gray-300">•</span>
                     <a href="/DOKUMENTASI/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-amber-700 underline flex items-center gap-1 transition">
                         📄 Dokumentasi Proyek
+                    </a>
+                    <span className="text-gray-300">•</span>
+                    <a href="https://unyku.id/Portofolio-BIMA-Project" target="_blank" rel="noopener noreferrer" className="hover:text-amber-700 underline flex items-center gap-1 transition">
+                        📂 Portofolio
                     </a>
                     <span className="text-gray-300">•</span>
                     <a href="https://unyku.id/BIMA-GitHub-Repo" target="_blank" rel="noopener noreferrer" className="hover:text-amber-700 underline flex items-center gap-1 transition">
