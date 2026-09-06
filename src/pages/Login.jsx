@@ -487,6 +487,7 @@ export default function Login({ onLogin, onStudentLogin, classes, defaultUserTyp
                                 className="w-full bg-amber-750 hover:bg-[#2D1B18] text-white font-black py-3 rounded-xl text-xs transition uppercase tracking-wider shadow-md cursor-pointer mt-2"
                             >
                                 {isStudentLoginTab ? 'Masuk Portal Belajar Siswa' : 'Daftar & Masuk Portal Siswa'}
+                            </button>
                         </form>
                     </div>
                 )}
