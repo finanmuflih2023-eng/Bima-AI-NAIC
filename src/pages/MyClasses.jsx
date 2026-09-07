@@ -29,7 +29,10 @@ export default function MyClasses({
         const activeTasks = tasks.filter(t => t.classToken === activeClass.token);
         const classEnrollments = (enrollments || []).filter(e => e.class_token === activeClass.token);
         const classAnnouncements = (announcements || []).filter(a => a.class_token === activeClass.token);
-        const classSubmissions = (submissions || []).filter(s => s.classToken === activeClass.token);
+        const classSubmissions = (submissions || []).filter(s => 
+            s.classToken && activeClass.token && 
+            s.classToken.trim().toUpperCase() === activeClass.token.trim().toUpperCase()
+        );
 
         return (
             <div className="p-8 text-left font-sans text-gray-800 antialiased w-full">
@@ -242,51 +245,109 @@ export default function MyClasses({
 
                 {/* Section 4: Submission Score Override & Teacher Manual Feedback */}
                 <div className="mt-6 bg-white rounded-2xl border border-gray-200 p-6 shadow-xs text-left">
-                    <h3 className="font-bold text-sm text-gray-900 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">
-                        📝 Penilaian Tugas Siswa & Override Nilai Guru ({classSubmissions.length})
+                    <h3 className="font-bold text-sm text-gray-900 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
+                        <span>📝 Hasil Pengumpulan Tugas & Penilaian Siswa ({classSubmissions.length})</span>
+                        <span className="text-[10px] text-gray-400 font-normal normal-case">Tersimpan otomatis di Supabase Database</span>
                     </h3>
 
                     {classSubmissions.length === 0 ? (
-                        <p className="text-xs text-gray-400 italic">Belum ada hasil pengumpulan tugas siswa di kelas ini.</p>
+                        <p className="text-xs text-gray-400 italic py-6 text-center">
+                            Belum ada hasil pengumpulan tugas lisan siswa di kelas ini. Saat siswa mengirimkan rekaman tugas di portal siswa, hasilnya akan muncul di sini secara otomatis.
+                        </p>
                     ) : (
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-4">
                             {classSubmissions.map((sub) => (
-                                <div key={sub.id} className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-extrabold text-gray-900">{sub.studentName}</span>
-                                            <span className="text-[10px] text-gray-400">• Tugas: {sub.taskTitle}</span>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-black ${sub.score >= 75 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
-                                                Nilai: {sub.score}%
-                                            </span>
+                                <div key={sub.id} className="bg-gray-50/90 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 text-xs shadow-2xs">
+                                    {/* Header Kartu Tugas Siswa */}
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-gray-200/60 pb-2.5">
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-black text-gray-900 text-sm">{sub.studentName}</span>
+                                                <span className="text-[10px] text-gray-400 font-mono">@{sub.studentUsername || sub.studentName}</span>
+                                                <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded font-semibold border border-amber-200/50">
+                                                    {sub.taskTitle}
+                                                </span>
+                                            </div>
+                                            <span className="text-[10px] text-gray-400 font-medium">Tanggal Pengumpulan: {sub.date || 'Baru Saja'}</span>
                                         </div>
-                                        <p className="text-gray-600 italic text-xxs mb-1">"{sub.transcript}"</p>
-                                        {sub.teacherComment && (
-                                            <p className="text-amber-900 bg-amber-50 border border-amber-200 p-1.5 rounded text-xxs font-semibold">
-                                                💬 Komentar Guru: {sub.teacherComment}
-                                            </p>
+
+                                        <div className="flex items-center gap-2">
+                                            <span className={`px-2.5 py-1 rounded-lg text-xs font-black ${sub.score >= 75 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
+                                                Skor Total: {sub.score}%
+                                            </span>
+                                            <button
+                                                onClick={() => {
+                                                    const newScore = prompt(`Ubah Nilai Keseluruhan untuk ${sub.studentName} (Saat ini: ${sub.score}%):`, sub.score);
+                                                    if (newScore !== null) {
+                                                        const scoreNum = parseInt(newScore, 10);
+                                                        const comment = prompt(`Beri Catatan / Komentar Manual Guru untuk ${sub.studentName}:`, sub.teacherComment || '');
+                                                        if (!isNaN(scoreNum)) {
+                                                            onUpdateSubmission(sub.id, {
+                                                                score: scoreNum,
+                                                                teacherComment: comment || ''
+                                                            });
+                                                            alert('Nilai dan komentar guru berhasil diperbarui!');
+                                                        }
+                                                    }
+                                                }}
+                                                className="bg-amber-800 hover:bg-amber-950 text-white font-bold px-3 py-1.5 rounded-lg text-xxs shrink-0 cursor-pointer transition"
+                                            >
+                                                ✏️ Ubah Nilai & Komentar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Break Down Tiga Dimensi Skor AI */}
+                                    <div className="grid grid-cols-3 gap-2 bg-white p-2.5 rounded-lg border border-gray-150 text-[11px]">
+                                        <div className="text-center border-r border-gray-100">
+                                            <span className="text-[9px] text-gray-400 font-bold uppercase block">Unggah-Ungguh</span>
+                                            <span className="font-black text-amber-900">{sub.scores?.unggahUngguh ?? 80}%</span>
+                                        </div>
+                                        <div className="text-center border-r border-gray-100">
+                                            <span className="text-[9px] text-gray-400 font-bold uppercase block">Artikulasi</span>
+                                            <span className="font-black text-blue-900">{sub.scores?.artikulasi ?? 80}%</span>
+                                        </div>
+                                        <div className="text-center">
+                                            <span className="text-[9px] text-gray-400 font-bold uppercase block">Kefasihan</span>
+                                            <span className="font-black text-emerald-900">{sub.scores?.fluency ?? 80}%</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Transkrip Ucapan Siswa */}
+                                    <div className="bg-white p-3 rounded-lg border border-gray-150">
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Transkrip Ucapan Siswa (Whisper AI STT):</span>
+                                        <p className="text-gray-800 font-mono text-xs italic">"{sub.transcript}"</p>
+
+                                        {/* Visual Word Feedback Pills */}
+                                        {sub.wordFeedbacks && sub.wordFeedbacks.length > 0 && (
+                                            <div className="mt-2.5 pt-2 border-t border-gray-100 flex flex-wrap gap-1">
+                                                {sub.wordFeedbacks.map((w, idx) => (
+                                                    <span 
+                                                        key={idx}
+                                                        className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+                                                            w.isCorrect 
+                                                                ? 'bg-emerald-100 text-emerald-800' 
+                                                                : 'bg-red-100 text-red-800 border border-red-200 cursor-pointer'
+                                                        }`}
+                                                        title={w.explanation || 'Kata tepat'}
+                                                    >
+                                                        {w.word} {!w.isCorrect && '⚠️'}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         )}
                                     </div>
 
-                                    <button
-                                        onClick={() => {
-                                            const newScore = prompt(`Ubah Nilai Keseluruhan untuk ${sub.studentName} (Saat ini: ${sub.score}%):`, sub.score);
-                                            if (newScore !== null) {
-                                                const scoreNum = parseInt(newScore, 10);
-                                                const comment = prompt(`Beri Catatan / Komentar Manual Guru untuk ${sub.studentName}:`, sub.teacherComment || '');
-                                                if (!isNaN(scoreNum)) {
-                                                    onUpdateSubmission(sub.id, {
-                                                        score: scoreNum,
-                                                        teacherComment: comment || ''
-                                                    });
-                                                    alert('Nilai dan komentar guru berhasil diperbarui!');
-                                                }
-                                            }
-                                        }}
-                                        className="bg-amber-800 hover:bg-amber-950 text-white font-bold px-3 py-2 rounded-xl text-xxs shrink-0 cursor-pointer"
-                                    >
-                                        ✏️ Ubah Nilai & Komentar
-                                    </button>
+                                    {/* Catatan / Komentar Guru */}
+                                    {sub.teacherComment && (
+                                        <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-lg text-xxs font-semibold text-amber-950 flex items-start gap-2">
+                                            <span>💬</span>
+                                            <div>
+                                                <strong className="block text-[10px] text-amber-900 uppercase">Komentar Manual Guru:</strong>
+                                                <span>{sub.teacherComment}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
